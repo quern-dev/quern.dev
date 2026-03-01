@@ -206,13 +206,6 @@ h1 {
     font-style: italic;
 }
 
-.prompt-card::before {
-    content: "\201C";
-    color: var(--accent);
-    font-size: 20px;
-    font-style: normal;
-    margin-right: 4px;
-}
 
 /* Requirements */
 .requirements {
