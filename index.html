@@ -1,0 +1,104 @@
+<!-- Logo mark (logo.png): letter "Q" set in American Typewriter Semibold
+     (index 3 in /System/Library/Fonts/AmericanTypewriter.ttc, macOS system font).
+     Color-inverted from the original wda-icon.png in the quern repo. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quern — Debug server for AI-assisted iOS development</title>
+    <meta name="description" content="A local debug server that gives AI coding agents live access to your iOS simulators and devices — logs, network traffic, screenshots, and UI control.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section class="hero">
+    <div class="container">
+        <div class="logo">
+            <img src="logo.png" alt="Quern" class="logo-mark">
+        </div>
+        <p class="eyebrow">QUERN &middot; Open source &middot; macOS &middot; Apache 2.0</p>
+        <h1>Eyes, ears, and hands for AI&#8209;assisted iOS development and&nbsp;test.</h1>
+        <p class="subtitle">A local debug server that gives AI coding agents live access to your iOS simulators and devices &mdash; logs, network traffic, screenshots, and UI control. No cloud. No telemetry.</p>
+        <div class="install-block">
+            <code id="install-cmd">curl -fsSL https://quern.dev/install.sh | bash</code>
+            <button class="copy-btn" onclick="copyInstall()" title="Copy to clipboard" id="copy-btn">&#x2398;</button>
+        </div>
+        <br>
+        <a class="cta-secondary" href="https://github.com/quern-dev/quern">View on GitHub &rarr;</a>
+    </div>
+</section>
+
+<section class="container">
+    <div class="features">
+        <div class="card">
+            <h3>Eyes</h3>
+            <p>Screenshots, UI accessibility trees, screen summaries, and annotated overlays. Your agent sees exactly what's on screen.</p>
+        </div>
+        <div class="card">
+            <h3>Ears</h3>
+            <p>Real-time logs, crash reports, build output, and full network traffic capture. Every signal your app emits, captured.</p>
+        </div>
+        <div class="card">
+            <h3>Hands</h3>
+            <p>Tap, swipe, type, boot simulators, install apps, and intercept or mock HTTP traffic. Full control over the runtime.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works container">
+    <h2>How it works</h2>
+    <p>Quern runs as a local server on your Mac. It connects to iOS simulators and physical devices via Apple's toolchain, captures logs and network traffic through lightweight adapters, and exposes everything as MCP tools that AI coding agents can call directly.</p>
+    <div class="infographic">
+        <img src="infographic.png" alt="Quern architecture — giving AI agents eyes, ears, and hands for mobile debugging" width="1600">
+    </div>
+    <p class="tool-count">76 MCP tools across 11 categories. Works with Claude Code, Cursor, and any MCP-compatible client.</p>
+</section>
+
+<section class="prompts container">
+    <h2>What you can ask</h2>
+    <div class="prompt-grid">
+        <div class="prompt-card">Boot an iPhone 16 simulator, build my app, and show me any errors.</div>
+        <div class="prompt-card">Mock the /api/users endpoint to return a 500 and see how the app handles it.</div>
+        <div class="prompt-card">Find the last crash report and tell me what caused it.</div>
+        <div class="prompt-card">Take a screenshot and tell me what's on screen.</div>
+        <div class="prompt-card">Show me all the API calls made during login.</div>
+    </div>
+</section>
+
+<section class="requirements container">
+    <h2>Requirements</h2>
+    <ul class="req-list">
+        <li class="required">macOS with Xcode and Command Line Tools</li>
+        <li class="required">Python 3.11+</li>
+        <li class="required">Node.js 18+</li>
+        <li class="auto">idb-companion &mdash; simulator UI automation</li>
+        <li class="auto">mitmproxy &mdash; network traffic capture</li>
+        <li class="auto">pymobiledevice3 &mdash; physical device support</li>
+    </ul>
+    <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px;">Don't worry about installing these yourself &mdash; <code style="font-family: var(--mono);">quern setup</code> handles them automatically.</p>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="links">
+            <a href="https://github.com/quern-dev/quern">GitHub</a>
+            <a href="https://github.com/quern-dev/quern#readme">Docs</a>
+            <a href="https://github.com/quern-dev/quern/blob/main/LICENSE">Apache 2.0</a>
+            <a href="https://github.com/quern-dev/quern/discussions/1">Contact</a>
+        </div>
+        <p>Built for iOS developers, QA teams, and AI agents.</p>
+    </div>
+</footer>
+
+<script>
+function copyInstall() {
+    navigator.clipboard.writeText('curl -fsSL https://quern.dev/install.sh | bash');
+    var btn = document.getElementById('copy-btn');
+    btn.textContent = '\u2713';
+    setTimeout(function() { btn.innerHTML = '\u2398'; }, 1500);
+}
+</script>
+
+</body>
+</html>
