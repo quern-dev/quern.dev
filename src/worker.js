@@ -6,8 +6,17 @@
  * (configured via not_found_handling = "none").
  */
 
-const GITHUB_API = "https://api.github.com/repos/quern-dev/quern/git/ref/heads/main";
+const GIT_REFS_URL = "https://github.com/quern-dev/quern.git/info/refs?service=git-upload-pack";
 const CACHE_TTL = 3600; // 1 hour
+
+/**
+ * Parse the main branch SHA from git smart HTTP protocol response.
+ * Format: "003d<sha> refs/heads/main\n"
+ */
+function parseMainSha(body) {
+  const match = body.match(/([0-9a-f]{40}) refs\/heads\/main/);
+  return match ? match[1] : null;
+}
 
 async function handleCheckUpdate(request) {
   const url = new URL(request.url);
@@ -15,9 +24,8 @@ async function handleCheckUpdate(request) {
 
   // Fetch latest commit SHA from GitHub (cached at edge)
   const cache = caches.default;
-  const cacheKey = new Request(GITHUB_API);
+  const cacheKey = new Request("https://quern.dev/_internal/github-sha-cache");
   let latestSha = null;
-  let debug = null;
 
   let cached = await cache.match(cacheKey);
   if (cached) {
@@ -25,37 +33,34 @@ async function handleCheckUpdate(request) {
     latestSha = data.sha;
   } else {
     try {
-      const resp = await fetch(GITHUB_API, {
+      const resp = await fetch(GIT_REFS_URL, {
         headers: {
-          "Accept": "application/vnd.github.v3+json",
-          "User-Agent": "quern-update-check/1.0",
+          "User-Agent": "git/2.0 quern-update-check",
         },
       });
       if (resp.ok) {
-        const data = await resp.json();
-        latestSha = data.object?.sha || data.sha;
-
-        // Cache the GitHub response at the edge
-        const cacheResp = new Response(JSON.stringify({ sha: latestSha }), {
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": `public, max-age=${CACHE_TTL}`,
-          },
-        });
-        await cache.put(cacheKey, cacheResp);
-      } else {
         const text = await resp.text();
-        debug = `GitHub ${resp.status}: ${text.slice(0, 200)}`;
+        latestSha = parseMainSha(text);
+
+        if (latestSha) {
+          // Cache at the edge
+          const cacheResp = new Response(JSON.stringify({ sha: latestSha }), {
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": `public, max-age=${CACHE_TTL}`,
+            },
+          });
+          await cache.put(cacheKey, cacheResp);
+        }
       }
-    } catch (e) {
-      debug = `fetch error: ${e.message}`;
+    } catch {
+      // Fetch failed — return unknown
     }
   }
 
   const body = {
     latest_sha: latestSha,
     update_available: latestSha !== null && clientSha !== "" && clientSha !== latestSha,
-    ...(debug ? { debug } : {}),
   };
 
   return new Response(JSON.stringify(body), {
