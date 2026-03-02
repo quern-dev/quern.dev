@@ -17,6 +17,7 @@ async function handleCheckUpdate(request) {
   const cache = caches.default;
   const cacheKey = new Request(GITHUB_API);
   let latestSha = null;
+  let debug = null;
 
   let cached = await cache.match(cacheKey);
   if (cached) {
@@ -42,15 +43,18 @@ async function handleCheckUpdate(request) {
           },
         });
         await cache.put(cacheKey, cacheResp);
+      } else {
+        debug = `GitHub returned ${resp.status}`;
       }
-    } catch {
-      // GitHub fetch failed — return unknown
+    } catch (e) {
+      debug = `fetch error: ${e.message}`;
     }
   }
 
   const body = {
     latest_sha: latestSha,
     update_available: latestSha !== null && clientSha !== "" && clientSha !== latestSha,
+    ...(debug ? { debug } : {}),
   };
 
   return new Response(JSON.stringify(body), {
