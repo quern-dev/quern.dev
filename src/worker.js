@@ -6,7 +6,7 @@
  * (configured via not_found_handling = "none").
  */
 
-const GITHUB_API = "https://api.github.com/repos/quern-dev/quern/commits/main";
+const GITHUB_API = "https://api.github.com/repos/quern-dev/quern/git/ref/heads/main";
 const CACHE_TTL = 3600; // 1 hour
 
 async function handleCheckUpdate(request) {
@@ -33,7 +33,7 @@ async function handleCheckUpdate(request) {
       });
       if (resp.ok) {
         const data = await resp.json();
-        latestSha = data.sha;
+        latestSha = data.object?.sha || data.sha;
 
         // Cache the GitHub response at the edge
         const cacheResp = new Response(JSON.stringify({ sha: latestSha }), {
@@ -44,7 +44,8 @@ async function handleCheckUpdate(request) {
         });
         await cache.put(cacheKey, cacheResp);
       } else {
-        debug = `GitHub returned ${resp.status}`;
+        const text = await resp.text();
+        debug = `GitHub ${resp.status}: ${text.slice(0, 200)}`;
       }
     } catch (e) {
       debug = `fetch error: ${e.message}`;
