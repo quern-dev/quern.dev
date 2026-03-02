@@ -1,15 +1,16 @@
 /**
- * Cloudflare Pages Function: GET /api/check-update
+ * Cloudflare Worker entry point.
  *
- * Compares a client's commit SHA against the latest on main.
- * Cloudflare analytics count requests automatically — no logging or storage.
+ * Static assets are served automatically via [assets] in wrangler.toml.
+ * This worker handles API routes that don't match a static file
+ * (configured via not_found_handling = "none").
  */
 
 const GITHUB_API = "https://api.github.com/repos/quern-dev/quern/commits/main";
 const CACHE_TTL = 3600; // 1 hour
 
-export async function onRequestGet(context) {
-  const url = new URL(context.request.url);
+async function handleCheckUpdate(request) {
+  const url = new URL(request.url);
   const clientSha = url.searchParams.get("sha") || "";
 
   // Fetch latest commit SHA from GitHub (cached at edge)
@@ -40,7 +41,7 @@ export async function onRequestGet(context) {
             "Cache-Control": `public, max-age=${CACHE_TTL}`,
           },
         });
-        context.waitUntil(cache.put(cacheKey, cacheResp));
+        await cache.put(cacheKey, cacheResp);
       }
     } catch {
       // GitHub fetch failed — return unknown
@@ -60,3 +61,16 @@ export async function onRequestGet(context) {
     },
   });
 }
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/check-update") {
+      return handleCheckUpdate(request);
+    }
+
+    // No matching route — return 404
+    return new Response("Not Found", { status: 404 });
+  },
+};
