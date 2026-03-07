@@ -83,10 +83,13 @@ export default {
 
     if (url.pathname === "/install.sh") {
       console.log(`[endpoint] /install.sh`);
-      const assetResponse = await env.ASSETS.fetch(request);
-      // Return with no-store to prevent edge caching, so the worker
-      // is always invoked and the request is always logged.
+      // Fetch the renamed asset (/_install.sh) so the CDN can't serve
+      // /install.sh directly and bypass the worker.
+      const assetUrl = new URL(request.url);
+      assetUrl.pathname = "/_install.sh";
+      const assetResponse = await env.ASSETS.fetch(new Request(assetUrl, request));
       const response = new Response(assetResponse.body, assetResponse);
+      response.headers.set("Content-Type", "text/plain; charset=utf-8");
       response.headers.set("Cache-Control", "no-store");
       return response;
     }
