@@ -83,6 +83,12 @@ export default {
 
     if (url.pathname === "/install.sh") {
       console.log(`[endpoint] /install.sh`);
+      const assetResponse = await env.ASSETS.fetch(request);
+      // Return with no-store to prevent edge caching, so the worker
+      // is always invoked and the request is always logged.
+      const response = new Response(assetResponse.body, assetResponse);
+      response.headers.set("Cache-Control", "no-store");
+      return response;
     }
 
     // Serve static assets via the ASSETS binding
