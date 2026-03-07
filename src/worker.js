@@ -77,10 +77,21 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/check-update") {
+      console.log(`[endpoint] /api/check-update sha=${url.searchParams.get("sha") || ""}`);
       return handleCheckUpdate(request);
     }
 
-    // No matching route — return 404
+    if (url.pathname === "/install.sh") {
+      console.log(`[endpoint] /install.sh`);
+    }
+
+    // Serve static assets via the ASSETS binding
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (assetResponse.status !== 404) {
+      return assetResponse;
+    }
+
+    // No matching route or asset — return 404
     return new Response("Not Found", { status: 404 });
   },
 };

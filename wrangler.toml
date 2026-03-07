@@ -4,9 +4,10 @@ main = "src/worker.js"
 
 [assets]
 directory = "./public"
+binding = "ASSETS"
 not_found_handling = "none"
 
 [observability]
 [observability.logs]
-enabled = false
+enabled = true
 invocation_logs = true
