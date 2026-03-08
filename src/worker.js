@@ -72,17 +72,27 @@ async function handleCheckUpdate(request) {
   });
 }
 
+async function getUid(request) {
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
+  return [...new Uint8Array(hash.slice(0, 4))]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/check-update") {
-      console.log(`[endpoint] /api/check-update sha=${url.searchParams.get("sha") || ""}`);
+      const uid = await getUid(request);
+      console.log(`[endpoint] /api/check-update sha=${url.searchParams.get("sha") || ""} uid=${uid}`);
       return handleCheckUpdate(request);
     }
 
     if (url.pathname === "/install.sh") {
-      console.log(`[endpoint] /install.sh`);
+      const uid = await getUid(request);
+      console.log(`[endpoint] /install.sh uid=${uid}`);
       // Fetch the renamed asset (/_install.sh) so the CDN can't serve
       // /install.sh directly and bypass the worker.
       const assetUrl = new URL(request.url);
