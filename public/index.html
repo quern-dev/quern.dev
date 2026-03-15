@@ -6,8 +6,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quern — Debug server for AI-assisted iOS development</title>
-    <meta name="description" content="A local debug server that gives AI coding agents live access to your iOS simulators and devices — logs, network traffic, screenshots, and UI control.">
+    <title>Quern — Debug server for AI-assisted iOS &amp; Android development</title>
+    <meta name="description" content="A local debug server that gives AI coding agents live access to your iOS simulators, Android emulators, and physical devices — logs, network traffic, screenshots, and UI control.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,8 +19,8 @@
             <img src="q_trace_clean.svg" alt="Quern" class="logo-mark">
         </div>
         <p class="eyebrow">QUERN &middot; Open source &middot; macOS &middot; Apache 2.0</p>
-        <h1>Eyes, ears, and hands for AI&#8209;assisted iOS development and&nbsp;test.</h1>
-        <p class="subtitle">A local debug server that gives AI coding agents live access to your iOS simulators and devices &mdash; logs, network traffic, screenshots, and UI control. No cloud. No telemetry.</p>
+        <h1>Eyes, ears, and hands for AI&#8209;assisted mobile development and&nbsp;test.</h1>
+        <p class="subtitle">A local debug server that gives AI coding agents live access to your iOS simulators, Android emulators, and physical devices &mdash; logs, network traffic, screenshots, and UI control. No cloud. No telemetry.</p>
         <div class="install-block">
             <code id="install-cmd">curl -fsSL https://quern.dev/install.sh | bash</code>
             <button class="copy-btn" onclick="copyInstall()" title="Copy to clipboard" id="copy-btn">&#x2398;</button>
@@ -42,31 +42,39 @@
         </div>
         <div class="card">
             <h3>Hands</h3>
-            <p>Tap, swipe, type, boot simulators, install apps, and intercept or mock HTTP traffic. Full control over the runtime.</p>
+            <p>Tap, swipe, type, boot simulators and emulators, install apps, and intercept or mock HTTP traffic. Full control over the runtime.</p>
         </div>
     </div>
 </section>
 
 <section class="how-it-works container">
     <h2>How it works</h2>
-    <p>Quern runs as a local server on your Mac. It connects to iOS simulators and physical devices via Apple's toolchain, captures logs and network traffic through lightweight adapters, and exposes everything as MCP tools that AI coding agents can call directly.</p>
-    <!-- <div class="infographic">
-        <img src="infographic.png" alt="Quern architecture — giving AI agents eyes, ears, and hands for mobile debugging" width="1600">
-    </div> -->
-    <p class="tool-count">76 MCP tools across 11 categories. Works with Claude Code, Cursor, and any MCP-compatible client.</p>
+    <div class="how-it-works-split">
+        <div class="how-it-works-text">
+            <p>Quern runs as a local server on your Mac. It connects to iOS simulators and Android emulators via their native toolchains, and to physical devices over USB. It captures logs and network traffic through lightweight adapters, and exposes everything as MCP tools that AI coding agents can call directly.</p>
+            <p class="tool-count">76 MCP tools across 11 categories, lazy-loaded so they don't bloat your context window. Works with Claude Code, Cursor, and any MCP-compatible client.</p>
+        </div>
+        <div class="context-screenshot">
+            <img src="images/context_use.png" alt="Context usage after loading 3 Quern MCP tools — only 4% of the context window used">
+        </div>
+    </div>
+    <div class="infographic">
+        <img src="images/infographic.png" alt="Quern architecture — giving AI agents eyes, ears, and hands for mobile debugging" width="1600">
+    </div>
 </section>
 
 <section class="prompts container">
     <h2>What you can ask</h2>
     <div class="prompt-grid">
         <div class="prompt-card">Boot an iPhone 16 simulator, build my app, and show me any errors.</div>
+        <div class="prompt-card">Boot a Pixel 9 emulator, install the APK, and check for crashes.</div>
         <div class="prompt-card">Mock the /api/users endpoint to return a 500 and see how the app handles it.</div>
         <div class="prompt-card">Find the last crash report and tell me what caused it.</div>
         <div class="prompt-card">Take a screenshot and tell me what's on screen.</div>
         <div class="prompt-card">Show me all the API calls made during login.</div>
         <div class="prompt-card">Intercept the auth token refresh and replace it with an expired one.</div>
-        <div class="prompt-card">Boot three different iPhone simulators and compare the layouts.</div>
-        <div class="prompt-card">Open a live preview of my iPhone so I can see what the agent is doing.</div>
+        <div class="prompt-card">Boot three different devices and compare the layouts across platforms.</div>
+        <div class="prompt-card">Open a live preview of my device so I can see what the agent is doing.</div>
         <div class="prompt-card">Check if the analytics payload includes the right event when I tap checkout.</div>
         <div class="prompt-card">Install the latest build on my physical device and walk through onboarding.</div>
         <div class="prompt-card">...and anything else you can think of.</div>
@@ -76,25 +84,29 @@
 <section class="requirements container">
     <h2>Requirements</h2>
     <ul class="req-list">
-        <li class="required">macOS with Xcode and Command Line Tools</li>
+        <li class="required">macOS</li>
+        <li class="required">Homebrew</li>
         <li class="required">Python 3.11+</li>
         <li class="required">Node.js 18+</li>
-        <li class="auto">idb-companion &mdash; simulator UI automation</li>
+        <li class="platform">Xcode &mdash; iOS support enabled when detected</li>
+        <li class="platform">Android SDK (adb) &mdash; Android support enabled when detected</li>
+        <li class="auto">idb-companion &mdash; iOS simulator UI automation</li>
         <li class="auto">mitmproxy &mdash; network traffic capture</li>
-        <li class="auto">pymobiledevice3 &mdash; physical device support</li>
+        <li class="auto">pymobiledevice3 &mdash; iOS physical device support</li>
+        <li class="auto">scrcpy &mdash; Android live screen preview</li>
     </ul>
-    <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px;">Don't worry about installing these yourself &mdash; <code style="font-family: var(--mono);">quern setup</code> handles them automatically.</p>
+    <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px;">The install script detects your platforms and sets up everything automatically.</p>
 </section>
 
 <footer>
     <div class="container">
         <div class="links">
             <a href="https://github.com/quern-dev/quern">GitHub</a>
-            <a href="https://github.com/quern-dev/quern#readme">Docs</a>
+            <a href="https://github.com/quern-dev/quern/blob/main/docs/guides/index.md">Docs</a>
             <a href="https://github.com/quern-dev/quern/blob/main/LICENSE">Apache 2.0</a>
             <a href="https://github.com/quern-dev/quern/discussions/1">Contact</a>
         </div>
-        <p>Built for iOS developers, QA teams, and AI agents.</p>
+        <p>Built for iOS and Android developers, QA teams, and AI agents.</p>
     </div>
 </footer>
 
