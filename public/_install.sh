@@ -46,7 +46,7 @@ ok "macOS $(sw_vers -productVersion)"
 
 # Git
 if ! command -v git &>/dev/null; then
-    die "Git is required. Install Xcode CLI tools: xcode-select --install"
+    die "Git is required. Install with: xcode-select --install (or brew install git)"
 fi
 ok "git $(git --version | awk '{print $3}')"
 
