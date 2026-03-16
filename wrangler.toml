@@ -3,7 +3,7 @@ compatibility_date = "2026-03-02"
 main = "src/worker.js"
 
 [assets]
-directory = "./public"
+directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "none"
 

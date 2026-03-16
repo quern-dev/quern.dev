@@ -1,0 +1,86 @@
+/* Quern dark theme customizations for Starlight */
+
+:root {
+	--sl-color-accent-low: #1a1640;
+	--sl-color-accent: #6C63FF;
+	--sl-color-accent-high: #A78BFA;
+	--sl-color-white: #F1F5F9;
+	--sl-color-gray-1: #CBD5E1;
+	--sl-color-gray-2: #94A3B8;
+	--sl-color-gray-3: #475569;
+	--sl-color-gray-4: #1E293B;
+	--sl-color-gray-5: #334155;
+	--sl-color-gray-6: #0F1117;
+	--sl-color-black: #0F1117;
+
+	/* Hairline / separator contrast */
+	--sl-color-hairline-shade: #334155;
+	--sl-color-hairline: #1E293B;
+	--sl-color-hairline-light: #334155;
+
+	/* Expressive Code (code blocks) contrast fixes */
+	--ec-brdCol: #475569;
+	--ec-frm-trmTtbDotsFg: #94A3B8;
+	--ec-frm-trmTtbDotsOpa: 0.7;
+	--ec-frm-trmTtbBrdBtmCol: #475569;
+	--ec-frm-inlBtnFg: #94A3B8;
+	--ec-frm-inlBtnBgIdleOpa: 0.2;
+	--ec-frm-inlBtnBgHoverOrFocusOpa: 0.4;
+	--ec-codeBg: #1E293B;
+	--ec-frm-trmBg: #1E293B;
+	--ec-frm-trmTtbBg: #172033;
+}
+
+/* Social icons: muted color, no divider (theme picker removed) */
+.social-icons a {
+	color: var(--sl-color-gray-2);
+}
+.social-icons a:hover {
+	color: var(--sl-color-white);
+}
+.social-icons::after {
+	display: none !important;
+}
+
+/* Thin scrollbars */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--sl-color-gray-5) transparent;
+}
+
+/* Inline code contrast */
+:root .sl-markdown-content code:not(pre code) {
+	background: #1E293B;
+	border-color: #475569;
+	color: #CBD5E1;
+}
+
+/* Force dark mode */
+:root[data-theme='light'] {
+	--sl-color-accent-low: #1a1640;
+	--sl-color-accent: #6C63FF;
+	--sl-color-accent-high: #A78BFA;
+	--sl-color-white: #F1F5F9;
+	--sl-color-gray-1: #CBD5E1;
+	--sl-color-gray-2: #94A3B8;
+	--sl-color-gray-3: #475569;
+	--sl-color-gray-4: #1E293B;
+	--sl-color-gray-5: #334155;
+	--sl-color-gray-6: #0F1117;
+	--sl-color-black: #0F1117;
+
+	--sl-color-hairline-shade: #334155;
+	--sl-color-hairline: #1E293B;
+	--sl-color-hairline-light: #334155;
+
+	--ec-brdCol: #475569;
+	--ec-frm-trmTtbDotsFg: #94A3B8;
+	--ec-frm-trmTtbDotsOpa: 0.7;
+	--ec-frm-trmTtbBrdBtmCol: #475569;
+	--ec-frm-inlBtnFg: #94A3B8;
+	--ec-frm-inlBtnBgIdleOpa: 0.2;
+	--ec-frm-inlBtnBgHoverOrFocusOpa: 0.4;
+	--ec-codeBg: #1E293B;
+	--ec-frm-trmBg: #1E293B;
+	--ec-frm-trmTtbBg: #172033;
+}

@@ -1,2 +1,6 @@
 .DS_Store
 quern-analytics/
+node_modules/
+dist/
+.astro/
+.wrangler/

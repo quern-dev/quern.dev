@@ -1,3 +1,6 @@
+---
+// Marketing landing page — standalone, not part of Starlight docs
+---
 <!-- Logo mark (logo.png): letter "Q" set in American Typewriter Semibold
      (index 3 in /System/Library/Fonts/AmericanTypewriter.ttc, macOS system font).
      Color-inverted from the original wda-icon.png in the quern repo. -->
@@ -13,20 +16,31 @@
 </head>
 <body>
 
+<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="site-header-logo">
+            <img src="q_trace_clean.svg" alt="">
+            <span>Quern</span>
+        </a>
+        <nav class="site-header-nav">
+            <a href="/getting-started/installation-and-setup/">Docs</a>
+            <a href="https://github.com/quern-dev/quern">GitHub</a>
+        </nav>
+    </div>
+</header>
+
 <section class="hero">
     <div class="container">
         <div class="logo">
             <img src="q_trace_clean.svg" alt="Quern" class="logo-mark">
         </div>
-        <p class="eyebrow">QUERN &middot; Open source &middot; macOS &middot; Apache 2.0</p>
+        <p class="eyebrow">Open source &middot; macOS &middot; Apache 2.0</p>
         <h1>Eyes, ears, and hands for AI&#8209;assisted mobile development and&nbsp;test.</h1>
         <p class="subtitle">A local debug server that gives AI coding agents live access to your iOS simulators, Android emulators, and physical devices &mdash; logs, network traffic, screenshots, and UI control. No cloud. No telemetry.</p>
         <div class="install-block">
             <code id="install-cmd">curl -fsSL https://quern.dev/install.sh | bash</code>
             <button class="copy-btn" onclick="copyInstall()" title="Copy to clipboard" id="copy-btn">&#x2398;</button>
         </div>
-        <br>
-        <a class="cta-secondary" href="https://github.com/quern-dev/quern">View on GitHub &rarr;</a>
     </div>
 </section>
 
@@ -102,7 +116,7 @@
     <div class="container">
         <div class="links">
             <a href="https://github.com/quern-dev/quern">GitHub</a>
-            <a href="https://github.com/quern-dev/quern/blob/main/docs/guides/index.md">Docs</a>
+            <a href="/getting-started/installation-and-setup/">Docs</a>
             <a href="https://github.com/quern-dev/quern/blob/main/LICENSE">Apache 2.0</a>
             <a href="https://github.com/quern-dev/quern/discussions/1">Contact</a>
         </div>
