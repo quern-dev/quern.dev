@@ -369,4 +369,13 @@ footer .links a:hover { color: var(--text); }
         font-size: 12px;
         padding: 10px 12px;
     }
+
+    .how-it-works-split {
+        flex-direction: column;
+    }
+
+    .context-screenshot {
+        flex: none;
+        width: 100%;
+    }
 }
