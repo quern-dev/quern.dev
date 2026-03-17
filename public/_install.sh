@@ -174,5 +174,5 @@ else
     printf "  Start the server:  ${BOLD}quern start${RESET}\n"
 fi
 
-printf "  Open the API docs:  ${BOLD}http://localhost:9100${RESET}\n"
+printf "  Open the API docs:  ${BOLD}http://localhost:9100/docs${RESET}\n"
 printf "\n"
