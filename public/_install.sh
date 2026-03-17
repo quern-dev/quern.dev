@@ -5,7 +5,7 @@ set -euo pipefail
 # Usage: curl -fsSL https://quern.dev/install.sh | bash
 
 INSTALL_DIR="$HOME/.local/share/quern"
-REPO_URL="https://github.com/quern-dev/quern.git"
+GITHUB_REPO="quern-dev/quern"
 MIN_PYTHON_VERSION="3.11"
 
 # ---------------------------------------------------------------------------
@@ -26,10 +26,14 @@ die()  { printf "\n${RED}${BOLD}Error:${RESET} %s\n" "$1"; exit 1; }
 
 # Compare version strings: returns 0 if $1 >= $2
 version_gte() {
-    printf '%s\n%s' "$1" "$2" | sort -t. -k1,1n -k2,2n -k3,3n -C
-    # sort -C exits 0 if already sorted (i.e. $2 <= $1 when $2 is first)
-    # We need $1 >= $2, so put $2 first
     [ "$(printf '%s\n%s' "$2" "$1" | sort -t. -k1,1n -k2,2n -k3,3n | head -1)" = "$2" ]
+}
+
+# Read version from pyproject.toml
+read_installed_version() {
+    if [ -f "$INSTALL_DIR/pyproject.toml" ]; then
+        sed -n 's/^version = "\(.*\)"/\1/p' "$INSTALL_DIR/pyproject.toml"
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -43,12 +47,6 @@ if [ "$(uname -s)" != "Darwin" ]; then
     die "Quern requires macOS. Detected: $(uname -s)"
 fi
 ok "macOS $(sw_vers -productVersion)"
-
-# Git
-if ! command -v git &>/dev/null; then
-    die "Git is required. Install with: xcode-select --install (or brew install git)"
-fi
-ok "git $(git --version | awk '{print $3}')"
 
 # Python — probe specific versions, then fall back to python3
 PYTHON_BIN=""
@@ -78,26 +76,73 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Phase 2: Clone or update
+# Phase 2: Download release
 # ---------------------------------------------------------------------------
 
-step "Installing Quern"
+step "Fetching latest release"
 
-if [ -d "$INSTALL_DIR/.git" ]; then
-    ok "Existing installation found at $INSTALL_DIR"
-    cd "$INSTALL_DIR"
-    if git pull --ff-only &>/dev/null; then
-        ok "Updated to latest version"
-    else
-        warn "Could not fast-forward (local changes?). Continuing with current version."
-        warn "To update manually: cd $INSTALL_DIR && git pull"
-    fi
-else
-    mkdir -p "$(dirname "$INSTALL_DIR")"
-    printf "  Cloning into %s...\n" "$INSTALL_DIR"
-    git clone "$REPO_URL" "$INSTALL_DIR"
-    ok "Cloned successfully"
+# Get latest release tag from GitHub API
+RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest") || \
+    die "Could not fetch release info from GitHub. Check your internet connection."
+
+LATEST_VERSION=$(printf '%s' "$RELEASE_JSON" | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
+if [ -z "$LATEST_VERSION" ]; then
+    die "Could not determine latest version from GitHub release."
 fi
+
+# Check if already installed at this version
+CURRENT_VERSION=$(read_installed_version)
+if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
+    ok "Quern v${LATEST_VERSION} is already installed"
+    printf "\n  Run ${BOLD}quern setup${RESET} to re-check dependencies.\n\n"
+    exit 0
+fi
+
+if [ -n "$CURRENT_VERSION" ]; then
+    ok "Upgrading v${CURRENT_VERSION} → v${LATEST_VERSION}"
+else
+    ok "Installing v${LATEST_VERSION}"
+fi
+
+step "Downloading Quern v${LATEST_VERSION}"
+
+TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+TMPDIR_DL=$(mktemp -d)
+trap 'rm -rf "$TMPDIR_DL"' EXIT
+
+curl -fsSL "$TARBALL_URL" -o "$TMPDIR_DL/quern.tar.gz" || \
+    die "Failed to download release tarball."
+ok "Downloaded"
+
+# Extract — GitHub tarballs extract to repo-name-version/
+tar -xzf "$TMPDIR_DL/quern.tar.gz" -C "$TMPDIR_DL" || \
+    die "Failed to extract tarball."
+EXTRACTED_DIR=$(find "$TMPDIR_DL" -mindepth 1 -maxdepth 1 -type d | head -1)
+if [ -z "$EXTRACTED_DIR" ]; then
+    die "Tarball extracted but no directory found."
+fi
+ok "Extracted"
+
+# Install to INSTALL_DIR
+mkdir -p "$(dirname "$INSTALL_DIR")"
+
+if [ -d "$INSTALL_DIR" ]; then
+    # Preserve venv and local state across upgrades
+    if [ -d "$INSTALL_DIR/.venv" ]; then
+        mv "$INSTALL_DIR/.venv" "$TMPDIR_DL/.venv-preserve"
+    fi
+    rm -rf "$INSTALL_DIR"
+fi
+
+mv "$EXTRACTED_DIR" "$INSTALL_DIR"
+
+# Restore preserved venv
+if [ -d "$TMPDIR_DL/.venv-preserve" ]; then
+    mv "$TMPDIR_DL/.venv-preserve" "$INSTALL_DIR/.venv"
+    ok "Preserved existing virtual environment"
+fi
+
+ok "Installed to $INSTALL_DIR"
 
 # ---------------------------------------------------------------------------
 # Phase 3: Delegate to setup
@@ -117,7 +162,7 @@ step "Registering MCP server"
 # ---------------------------------------------------------------------------
 
 printf "\n"
-printf "${GREEN}${BOLD}  Quern is installed!${RESET}\n"
+printf "${GREEN}${BOLD}  Quern v${LATEST_VERSION} is installed!${RESET}\n"
 printf "\n"
 
 if command -v quern &>/dev/null; then
