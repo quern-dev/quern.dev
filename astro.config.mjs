@@ -7,6 +7,7 @@ export default defineConfig({
   integrations: [
       starlight({
           title: 'Quern',
+          favicon: '/favicon.png',
           logo: {
               src: './src/assets/logo.svg',
           },
