@@ -23,6 +23,7 @@ export default defineConfig({
                       { label: 'Installation & Setup', slug: 'getting-started/installation-and-setup' },
                       { label: 'Device Pool & Resolution', slug: 'getting-started/device-pool' },
                       { label: 'Build & Install', slug: 'getting-started/build-and-install' },
+                      { label: 'App Knowledge Base', slug: 'getting-started/app-knowledge' },
                   ],
               },
               {
@@ -86,6 +87,7 @@ export default defineConfig({
                       { label: 'Onboarding onto a Project', slug: 'workflows/workflow-onboarding' },
                       { label: 'Location Simulation', slug: 'workflows/workflow-location-testing' },
                       { label: 'Agent-Generated Test Scripts', slug: 'workflows/workflow-test-scripts' },
+                      { label: 'Building an App Knowledge Base', slug: 'workflows/workflow-app-knowledge' },
                   ],
               },
           ],
