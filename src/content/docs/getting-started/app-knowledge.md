@@ -24,7 +24,7 @@ A directory of structured markdown files that live in your repo alongside the ap
     │   └── ...
     ├── flows/              # Multi-step sequences (login, purchase, etc.)
     ├── alerts/             # Modals, dialogs, coaching tips that can appear unexpectedly
-    ├── deep-links/         # URL schemes and universal links
+    ├── deep-links/         # deep_links.json — structured deep link registry
     └── quirks/             # Non-obvious behaviors, workarounds, device-specific issues
 ```
 
@@ -121,7 +121,7 @@ App-wide modes that change what the agent sees — authentication state, subscri
 
 The knowledge base becomes even more powerful when connected to the app's stored state. Many coaching modals, onboarding flags, and feature toggles are stored in plist files that can be read and written directly.
 
-During the tour, investigate the app's plist files (see [App State Management](/ios/app-state)):
+During the tour, investigate the app's plist files (see [App State Management](/ios/app-state/)):
 
 > "Read the app's preferences plist and look for flags related to onboarding or coaching tips"
 
@@ -131,7 +131,13 @@ When you find them, document the key names in the alert files and in a dedicated
 - **Triggering specific modals** for testing — delete a single flag and relaunch
 - **Saving known-good checkpoints** — `save_app_state` after setting all flags, restore before each test
 
-See [Building an App Knowledge Base](/workflows/workflow-app-knowledge) for a detailed walkthrough of this process.
+> **Checkpointing a logged-in state?** Pass `include_keychain: true`. Auth tokens live in the
+> simulator keychain, outside every app container, so a checkpoint without it always restores
+> to the login screen however it was captured. Capturing the keychain needs the device shut
+> down (`xcrun simctl shutdown <udid>`) — it is a WAL-mode SQLite database held open by
+> `securityd`. `restore_app_state` puts it back automatically when the checkpoint has one.
+
+See [Building an App Knowledge Base](/workflows/workflow-app-knowledge/) for a detailed walkthrough of this process.
 
 ## Maintaining the Knowledge Base
 

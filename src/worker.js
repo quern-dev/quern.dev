@@ -9,57 +9,110 @@
 const GIT_REFS_URL = "https://github.com/quern-dev/quern.git/info/refs?service=git-upload-pack";
 const CACHE_TTL = 3600; // 1 hour
 
+// Channels map to the reserved pointer branches the release procedure
+// fast-forwards. Comparing against `main` (as this endpoint used to) tells a
+// fully up-to-date stable user that an update is available the moment any
+// commit lands on main — while `quern update`, which compares against
+// release/stable, correctly refuses to apply anything. Same data, opposite
+// answers. See docs/release-channels.md in the quern repo.
+const CHANNEL_BRANCHES = {
+  stable: "refs/heads/release/stable",
+  beta: "refs/heads/release/beta",
+};
+const DEFAULT_CHANNEL = "stable";
+
 /**
- * Parse the main branch SHA from git smart HTTP protocol response.
- * Format: "003d<sha> refs/heads/main\n"
+ * Parse a git smart-HTTP ref advertisement into a ref -> sha map.
+ *
+ * Annotated tags appear twice: `refs/tags/v1.2.3` is the tag object and
+ * `refs/tags/v1.2.3^{}` is the commit it points at. Only the peeled form is
+ * comparable to a branch head, and every Quern release tag is annotated.
  */
-function parseMainSha(body) {
-  const match = body.match(/([0-9a-f]{40}) refs\/heads\/main/);
-  return match ? match[1] : null;
+function parseRefs(body) {
+  const refs = new Map();
+  const pattern = /([0-9a-f]{40}) (refs\/[^\s\0\n]+)/g;
+  let match;
+  while ((match = pattern.exec(body)) !== null) {
+    refs.set(match[2], match[1]);
+  }
+  return refs;
+}
+
+/** Tag name whose commit is `sha`, or null. Prefers the peeled form. */
+function versionForSha(refs, sha) {
+  if (!sha) return null;
+  for (const [ref, target] of refs) {
+    if (!ref.startsWith("refs/tags/") || target !== sha) continue;
+    const name = ref.slice("refs/tags/".length);
+    if (name.endsWith("^{}")) return name.slice(0, -3).replace(/^v/, "");
+  }
+  // Lightweight tag fallback — no peeled entry exists for these.
+  for (const [ref, target] of refs) {
+    if (ref.startsWith("refs/tags/") && !ref.endsWith("^{}") && target === sha) {
+      return ref.slice("refs/tags/".length).replace(/^v/, "");
+    }
+  }
+  return null;
+}
+
+/** Fetch and cache the ref advertisement at the edge. */
+async function fetchRefs() {
+  const cache = caches.default;
+  const cacheKey = new Request("https://quern.dev/_internal/github-refs-cache");
+
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    return new Map(await cached.json());
+  }
+
+  try {
+    const resp = await fetch(GIT_REFS_URL, {
+      headers: { "User-Agent": "git/2.0 quern-update-check" },
+    });
+    if (!resp.ok) return null;
+    const refs = parseRefs(await resp.text());
+    if (refs.size === 0) return null;
+
+    await cache.put(
+      cacheKey,
+      new Response(JSON.stringify([...refs]), {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": `public, max-age=${CACHE_TTL}`,
+        },
+      })
+    );
+    return refs;
+  } catch {
+    return null;
+  }
 }
 
 async function handleCheckUpdate(request) {
   const url = new URL(request.url);
   const clientSha = url.searchParams.get("sha") || "";
 
-  // Fetch latest commit SHA from GitHub (cached at edge)
-  const cache = caches.default;
-  const cacheKey = new Request("https://quern.dev/_internal/github-sha-cache");
+  const requested = url.searchParams.get("channel") || DEFAULT_CHANNEL;
+  // Unknown channel falls back to stable rather than erroring: a client from a
+  // future version naming a channel this worker doesn't know should still get a
+  // conservative, useful answer.
+  const channel = requested in CHANNEL_BRANCHES ? requested : DEFAULT_CHANNEL;
+
+  const refs = await fetchRefs();
   let latestSha = null;
+  let latestVersion = null;
 
-  let cached = await cache.match(cacheKey);
-  if (cached) {
-    const data = await cached.json();
-    latestSha = data.sha;
-  } else {
-    try {
-      const resp = await fetch(GIT_REFS_URL, {
-        headers: {
-          "User-Agent": "git/2.0 quern-update-check",
-        },
-      });
-      if (resp.ok) {
-        const text = await resp.text();
-        latestSha = parseMainSha(text);
-
-        if (latestSha) {
-          // Cache at the edge
-          const cacheResp = new Response(JSON.stringify({ sha: latestSha }), {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": `public, max-age=${CACHE_TTL}`,
-            },
-          });
-          await cache.put(cacheKey, cacheResp);
-        }
-      }
-    } catch {
-      // Fetch failed — return unknown
-    }
+  if (refs) {
+    // Fall back to main only if the pointer branch is missing entirely, so a
+    // mis-bootstrapped repo degrades to the old behaviour instead of 500ing.
+    latestSha = refs.get(CHANNEL_BRANCHES[channel]) || refs.get("refs/heads/main") || null;
+    latestVersion = versionForSha(refs, latestSha);
   }
 
   const body = {
     latest_sha: latestSha,
+    latest_version: latestVersion,
+    channel,
     update_available: latestSha !== null && clientSha !== "" && clientSha !== latestSha,
   };
 
@@ -86,7 +139,7 @@ export default {
 
     if (url.pathname === "/api/check-update") {
       const uid = await getUid(request);
-      console.log(`[endpoint] /api/check-update sha=${url.searchParams.get("sha") || ""} uid=${uid}`);
+      console.log(`[endpoint] /api/check-update sha=${url.searchParams.get("sha") || ""} channel=${url.searchParams.get("channel") || "stable"} uid=${uid}`);
       return handleCheckUpdate(request);
     }
 

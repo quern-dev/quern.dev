@@ -212,7 +212,7 @@ tap_element(label="Post", element_type="button")
 tap_element(identifier="_Continue button")
 ```
 
-The knowledge base tells the script exactly which interceptors to handle and how. See [Agent-Generated Test Scripts](/workflows/workflow-test-scripts) for the full pattern.
+The knowledge base tells the script exactly which interceptors to handle and how. See [Agent-Generated Test Scripts](/workflows/workflow-test-scripts/) for the full pattern.
 
 ### State-Driven Test Scenarios
 

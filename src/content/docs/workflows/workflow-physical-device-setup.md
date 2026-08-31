@@ -42,7 +42,7 @@ Your agent will:
 2. Build WDA (first time takes a minute or two)
 3. Install "Quern Driver" on the device
 
-**If you're on a free developer account:** Your agent will warn you about the 7-day profile expiry and the App ID slot limits. See [WDA Guide](ios-wda.md#free-vs-paid-developer-accounts) for details.
+**If you're on a free developer account:** Your agent will warn you about the 7-day profile expiry and the App ID slot limits. See [WDA Guide](/ios/ios-wda/#free-vs-paid-developer-accounts) for details.
 
 **If the install fails with a trust error:** You need to trust the developer profile on the device: Settings > General > VPN & Device Management > [your name] > Trust. This only applies to free accounts.
 
