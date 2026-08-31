@@ -1,3 +1,7 @@
+# Cloudflare is connected to this repo's GitHub remote and deploys on every
+# push to main. That connection lives in the Cloudflare dashboard, not here —
+# so `wrangler deploy` is a fallback, not the normal path. See README.md.
+
 name = "quern-dev-website"
 compatibility_date = "2026-03-02"
 main = "src/worker.js"
