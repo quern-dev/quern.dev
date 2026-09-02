@@ -37,6 +37,7 @@ MAPPING = {
     "getting-started/installation-and-setup.md": "getting-started.md",
     "getting-started/device-pool.md": "device-pool.md",
     "getting-started/build-and-install.md": "build-and-install.md",
+    "getting-started/update-channels.md": "update-channels.md",
     "getting-started/app-knowledge.md": "app-knowledge.md",
     "ios/app-state.md": "app-state.md",
     "ios/ios-logging.md": "ios-logging.md",
@@ -49,6 +50,7 @@ MAPPING = {
     "android/android-logging.md": "android-logging.md",
     "react-native/react-native-logging.md": "react-native-logging.md",
     "cross-platform/network-debugging.md": "network-debugging.md",
+    "cross-platform/deep-link-testing.md": "deep-link-testing.md",
     "workflows/workflow-api-testing.md": "workflow-api-testing.md",
     "workflows/workflow-crash-investigation.md": "workflow-crash-investigation.md",
     "workflows/workflow-multi-device.md": "workflow-multi-device.md",
@@ -63,7 +65,6 @@ MAPPING = {
 # instead of silently ignoring them.
 UNPUBLISHED_GUIDES = {
     "index.md",          # the repo's own guide index; Starlight builds its own
-    "deep-link-testing.md",  # no site page yet
 }
 
 # guide filename -> Starlight route, derived from MAPPING

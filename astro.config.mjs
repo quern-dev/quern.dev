@@ -23,6 +23,7 @@ export default defineConfig({
                       { label: 'Installation & Setup', slug: 'getting-started/installation-and-setup' },
                       { label: 'Device Pool & Resolution', slug: 'getting-started/device-pool' },
                       { label: 'Build & Install', slug: 'getting-started/build-and-install' },
+                      { label: 'Update Channels', slug: 'getting-started/update-channels' },
                       { label: 'App Knowledge Base', slug: 'getting-started/app-knowledge' },
                   ],
               },
@@ -75,6 +76,17 @@ export default defineConfig({
                   label: 'Cross-Platform',
                   items: [
                       { label: 'Network Debugging Patterns', slug: 'cross-platform/network-debugging' },
+                      { label: 'Deep Link Testing', slug: 'cross-platform/deep-link-testing' },
+                  ],
+              },
+              {
+                  label: 'Reference',
+                  items: [
+                      {
+                          label: 'API Reference',
+                          link: 'https://github.com/quern-dev/quern/blob/main/docs/api-reference.md',
+                          attrs: { target: '_blank' },
+                      },
                   ],
               },
               {
