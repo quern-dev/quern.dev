@@ -22,6 +22,24 @@ const CHANNEL_BRANCHES = {
 const DEFAULT_CHANNEL = "stable";
 
 /**
+ * Infer the channel from the client's version string.
+ *
+ * Clients only started sending `channel=` after v0.14.1-beta.2, so every beta
+ * client already in the field omits it and gets compared against
+ * release/stable. That produced a live downgrade prompt: a user on
+ * 0.14.1-beta.2 was told "Update available (v0.14.0)". Those clients cannot be
+ * fixed by shipping a new quern, because the broken check is what would have
+ * told them to upgrade.
+ *
+ * A prerelease suffix is the only channel signal such a client sends, so use
+ * it. Explicit `channel=` always wins — this is a fallback for clients that
+ * cannot express the answer, not a second opinion about clients that can.
+ */
+function channelFromVersion(version) {
+  return /-(?:beta|rc|alpha)\b/i.test(version) ? "beta" : DEFAULT_CHANNEL;
+}
+
+/**
  * Parse a git smart-HTTP ref advertisement into a ref -> sha map.
  *
  * Annotated tags appear twice: `refs/tags/v1.2.3` is the tag object and
@@ -92,7 +110,9 @@ async function handleCheckUpdate(request) {
   const url = new URL(request.url);
   const clientSha = url.searchParams.get("sha") || "";
 
-  const requested = url.searchParams.get("channel") || DEFAULT_CHANNEL;
+  const requested =
+    url.searchParams.get("channel") ||
+    channelFromVersion(url.searchParams.get("version") || "");
   // Unknown channel falls back to stable rather than erroring: a client from a
   // future version naming a channel this worker doesn't know should still get a
   // conservative, useful answer.

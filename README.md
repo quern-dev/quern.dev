@@ -30,6 +30,17 @@ To sanity-check what is actually live:
 curl -s https://quern.dev/api/check-update?sha=$(git -C ../quern rev-parse origin/release/stable) | python3 -m json.tool
 ```
 
+`update_available` is only ever true when the client sends `sha=`; omitting it
+answers `false` regardless of channel, which reads like a bug and is not one.
+
+The channel is taken from `channel=` when the client sends it, and otherwise
+inferred from a prerelease suffix in `version=`. Clients older than v0.14.1 send
+neither `channel=` nor anything else that identifies the channel except the
+version string, so without the inference a beta user is compared against
+release/stable and told to install an older version. Those clients cannot be
+fixed by shipping a new quern, because the broken check is what would have told
+them to upgrade.
+
 ## The docs are generated, not hand-written
 
 Everything under `src/content/docs/` is a derived copy of `docs/guides/*.md` in
