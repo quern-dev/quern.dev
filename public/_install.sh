@@ -106,13 +106,46 @@ fi
 
 step "Downloading Quern v${LATEST_VERSION}"
 
-TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+# Prefer the release's own asset over GitHub's generated source tarball. The
+# asset bundles the signed, notarized menu-bar Quern.app alongside the same
+# source tree; the generated tarball is source only, so installing from it
+# leaves the menu bar app absent with nothing to say why. `quern update` has
+# preferred the asset since it existed -- this brings a fresh install in line
+# with an upgrade.
+#
+# Matched by exact name, not by prefix, for the same reason the updater does:
+# a release carrying a second quern-*.tar.gz would otherwise be a coin toss
+# between them, and the wrong one installs a version that disagrees with the
+# tag it reports.
+ASSET_URL=$(printf '%s' "$RELEASE_JSON" | "$PYTHON_BIN" -c '
+import json, sys
+wanted = "quern-" + sys.argv[1] + ".tar.gz"
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+for asset in data.get("assets", []):
+    if asset.get("name") == wanted and asset.get("browser_download_url"):
+        print(asset["browser_download_url"])
+        break
+' "$LATEST_VERSION" || true)
+
+if [ -n "$ASSET_URL" ]; then
+    TARBALL_URL="$ASSET_URL"
+    BUNDLE_NOTE=" (with menu-bar app)"
+else
+    # Releases cut before the asset existed, and any release where the upload
+    # did not happen. Source-only is a complete, working install.
+    TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+    BUNDLE_NOTE=""
+fi
+
 TMPDIR_DL=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_DL"' EXIT
 
 curl -fsSL "$TARBALL_URL" -o "$TMPDIR_DL/quern.tar.gz" || \
     die "Failed to download release tarball."
-ok "Downloaded"
+ok "Downloaded${BUNDLE_NOTE}"
 
 # Extract — GitHub tarballs extract to repo-name-version/
 tar -xzf "$TMPDIR_DL/quern.tar.gz" -C "$TMPDIR_DL" || \
