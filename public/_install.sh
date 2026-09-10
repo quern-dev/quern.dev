@@ -90,22 +90,6 @@ if [ -z "$LATEST_VERSION" ]; then
     die "Could not determine latest version from GitHub release."
 fi
 
-# Check if already installed at this version
-CURRENT_VERSION=$(read_installed_version)
-if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
-    ok "Quern v${LATEST_VERSION} is already installed"
-    printf "\n  Run ${BOLD}quern setup${RESET} to re-check dependencies.\n\n"
-    exit 0
-fi
-
-if [ -n "$CURRENT_VERSION" ]; then
-    ok "Upgrading v${CURRENT_VERSION} → v${LATEST_VERSION}"
-else
-    ok "Installing v${LATEST_VERSION}"
-fi
-
-step "Downloading Quern v${LATEST_VERSION}"
-
 # Prefer the release's own asset over GitHub's generated source tarball. The
 # asset bundles the signed, notarized menu-bar Quern.app alongside the same
 # source tree; the generated tarball is source only, so installing from it
@@ -129,6 +113,37 @@ for asset in data.get("assets", []):
         print(asset["browser_download_url"])
         break
 ' "$LATEST_VERSION" || true)
+
+# Check if already installed at this version
+CURRENT_VERSION=$(read_installed_version)
+REPAIRING=""
+if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
+    # Same version is normally nothing to do. One case is not: an install that
+    # reached this version by updating from before v0.15.0 has the source tree
+    # and no menu-bar app. That version's updater fetched GitHub's generated
+    # source tarball because it had no concept of release assets -- and the
+    # code that prefers the asset shipped inside the asset, so it could not
+    # help itself. `quern update` will not repair it either, since it is
+    # already on the latest version and downloads nothing.
+    #
+    # Reinstalling over the top is the repair, and it costs one command rather
+    # than waiting for the next release.
+    if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] && [ -n "$ASSET_URL" ]; then
+        REPAIRING="1"
+        ok "Quern v${LATEST_VERSION} is installed, but the menu-bar app is missing"
+        step "Reinstalling to add it"
+    else
+        ok "Quern v${LATEST_VERSION} is already installed"
+        printf "\n  Run ${BOLD}quern setup${RESET} to re-check dependencies.\n\n"
+        exit 0
+    fi
+elif [ -n "$CURRENT_VERSION" ]; then
+    ok "Upgrading v${CURRENT_VERSION} → v${LATEST_VERSION}"
+else
+    ok "Installing v${LATEST_VERSION}"
+fi
+
+step "Downloading Quern v${LATEST_VERSION}"
 
 if [ -n "$ASSET_URL" ]; then
     TARBALL_URL="$ASSET_URL"
