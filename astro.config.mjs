@@ -24,6 +24,7 @@ export default defineConfig({
                       { label: 'Device Pool & Resolution', slug: 'getting-started/device-pool' },
                       { label: 'Build & Install', slug: 'getting-started/build-and-install' },
                       { label: 'Update Channels', slug: 'getting-started/update-channels' },
+                      { label: 'The Menu Bar App', slug: 'getting-started/menu-bar-app' },
                       { label: 'App Knowledge Base', slug: 'getting-started/app-knowledge' },
                   ],
               },

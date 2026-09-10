@@ -38,6 +38,7 @@ MAPPING = {
     "getting-started/device-pool.md": "device-pool.md",
     "getting-started/build-and-install.md": "build-and-install.md",
     "getting-started/update-channels.md": "update-channels.md",
+    "getting-started/menu-bar-app.md": "menu-bar-app.md",
     "getting-started/app-knowledge.md": "app-knowledge.md",
     "ios/app-state.md": "app-state.md",
     "ios/ios-logging.md": "ios-logging.md",
