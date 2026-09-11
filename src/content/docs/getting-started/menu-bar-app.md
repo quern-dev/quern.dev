@@ -12,12 +12,47 @@ It is macOS only. Everything it does, the CLI already did.
 
 ## Getting it
 
-It arrives with Quern. `quern setup` installs it and `quern update` keeps it
-current, so there is nothing separate to download.
+If you installed Quern the normal way, it arrives with it. `quern setup`
+installs the app and `quern update` keeps it current, so there is nothing
+separate to download.
 
 If you installed before v0.15.0 and have never updated, you will not have it —
 the app ships inside the release asset rather than GitHub's generated source
 tarball. One `quern update` brings it in.
+
+### From a git clone
+
+A clone does not get the app, and this is deliberate: `quern setup` skips it
+on the assumption that anyone working from source would rather control their
+own build than have one installed over it.
+
+That left no instructions at all, which is worse. There are now:
+
+```sh
+scripts/install-menubar-app.sh            # the signed app from the matching release
+scripts/install-menubar-app.sh --build    # build from macos/QuernMenuBar instead
+```
+
+Both install to `~/Applications/Quern.app` and quit a running copy first.
+
+Take the default unless you are working on the app itself. A local build is
+unsigned, so its code-signing identity changes every time you rebuild, macOS
+treats each build as a different app, and launch-at-login and any permissions
+you grant will not persist. The released build is signed and notarized, so
+they do.
+
+Either way the app only reads `~/.quern/*.json`, so it reports on whichever
+server is running regardless of which install started it.
+
+It is installed to `~/Applications/Quern.app`, so Spotlight and Launchpad both
+find it. If you quit it and want it back:
+
+```sh
+open ~/Applications/Quern.app
+```
+
+`quern setup` also starts it, and will quit a running copy first so an update
+actually takes effect.
 
 ## What the menu shows
 
@@ -56,10 +91,21 @@ This item is hidden if the screen-mirror app could not be built, which happens
 when Xcode Command Line Tools are missing. `quern setup` will tell you, and
 offer to open the installer.
 
-**Settings.** The update channel picker — stable or beta, the same setting as
-`quern set-channel` — and a launch-at-login toggle. It also shows the server's
-address, version and uptime, and the full UDID of the active device, which the
-menu deliberately leaves out to keep itself narrow.
+**Settings.** Three things you would otherwise reach for the CLI to change.
+
+*Network capture* carries "Install the capture certificate automatically". Off
+by default: capturing HTTPS needs each device to trust Quern's certificate
+authority, and installing one is a bigger commitment than turning capture on,
+so Quern asks the first time. Turn this on to answer once instead. The same
+setting is `quern set-auto-install-cert`, and it is shown here so a standing
+policy is visible and reversible rather than buried in a config file.
+
+*Updates* carries the channel picker, stable or beta, the same setting as
+`quern set-channel`.
+
+There is also a launch-at-login toggle, and a read-only view of the server's
+address, version and uptime, plus the full UDID of the active device — which
+the menu deliberately leaves out to keep itself narrow.
 
 ## Quitting
 
