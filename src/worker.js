@@ -159,6 +159,42 @@ function versionForSha(refs, sha) {
   return null;
 }
 
+/**
+ * The newest release a client on this channel could actually install.
+ *
+ * `versionForSha` only answers when a tag points *at* the channel head, and a
+ * Worker has no commit graph so there is no nearest-ancestor tag to find. The
+ * head is legitimately untagged some of the time: `docs/release-channels.md`
+ * documents "untagged beta advance" -- fast-forwarding release/beta to a main
+ * commit so git-clone beta users see recent changes without minting a version.
+ *
+ * During that window a tarball client has no sha to compare and no version to
+ * compare against, so it would be told "no update" however far behind it is --
+ * silently reinstating the bug this endpoint was just fixed for, in a narrower
+ * case. What makes that wrong rather than merely conservative is that a
+ * release they *could* install usually does exist: tarball installs update
+ * through the GitHub Releases API, which is driven by tags, so the newest tag
+ * is exactly what `updater.py` would hand them.
+ *
+ * Channel-aware, because the two mean different things. Stable users are only
+ * offered releases; beta users are offered prereleases too, matching
+ * `_fetch_latest_release`.
+ */
+export function newestTaggedVersion(refs, channel) {
+  let best = null;
+  for (const ref of refs.keys()) {
+    if (!ref.startsWith("refs/tags/")) continue;
+    const name = ref.slice("refs/tags/".length).replace(/\^\{\}$/, "");
+    const parsed = parseVersion(name);
+    if (!parsed) continue;
+    // A prerelease is only a candidate on the beta channel.
+    if (channel !== "beta" && parsed.pre.length > 0) continue;
+    const version = name.replace(/^v/, "");
+    if (best === null || compareVersions(version, best) === 1) best = version;
+  }
+  return best;
+}
+
 /** Fetch and cache the ref advertisement at the edge. */
 async function fetchRefs() {
   const cache = caches.default;
@@ -192,7 +228,12 @@ async function fetchRefs() {
   }
 }
 
-async function handleCheckUpdate(request) {
+/**
+ * `refs` is injected only so this can be tested without a Worker runtime:
+ * `fetchRefs` reaches for `caches.default`, which does not exist in node.
+ * Production never passes it.
+ */
+export async function handleCheckUpdate(request, refsOverride = null) {
   const url = new URL(request.url);
   const clientSha = url.searchParams.get("sha") || "";
   const clientVersion = url.searchParams.get("version") || "";
@@ -204,7 +245,7 @@ async function handleCheckUpdate(request) {
   // conservative, useful answer.
   const channel = requested in CHANNEL_BRANCHES ? requested : DEFAULT_CHANNEL;
 
-  const refs = await fetchRefs();
+  const refs = refsOverride ?? (await fetchRefs());
   let latestSha = null;
   let latestVersion = null;
 
@@ -213,6 +254,11 @@ async function handleCheckUpdate(request) {
     // mis-bootstrapped repo degrades to the old behaviour instead of 500ing.
     latestSha = refs.get(CHANNEL_BRANCHES[channel]) || refs.get("refs/heads/main") || null;
     latestVersion = versionForSha(refs, latestSha);
+    if (latestVersion === null) {
+      // The head is untagged. Name the newest release a client could install
+      // instead of nothing -- see newestTaggedVersion.
+      latestVersion = newestTaggedVersion(refs, channel);
+    }
   }
 
   const body = {

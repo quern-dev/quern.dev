@@ -29,6 +29,12 @@ test("prerelease identifiers compare field by field", () => {
   assert.equal(compareVersions("0.14.1-beta.10", "0.14.1-beta.9"), 1, "numeric, not lexical");
   assert.equal(compareVersions("0.14.1-alpha", "0.14.1-beta"), -1);
   assert.equal(compareVersions("0.14.1-beta", "0.14.1-beta.1"), -1, "fewer fields precede more");
+  // semver §11: a numeric identifier always precedes an alphanumeric one.
+  // Nothing else here puts the two in the same position, so inverting this
+  // rule passed every other test.
+  assert.equal(compareVersions("1.0.0-1", "1.0.0-alpha"), -1);
+  assert.equal(compareVersions("1.0.0-alpha", "1.0.0-1"), 1);
+  assert.equal(compareVersions("1.0.0-alpha.1", "1.0.0-alpha.beta"), -1);
 });
 
 test("unparseable versions answer null rather than guessing", () => {
@@ -38,8 +44,17 @@ test("unparseable versions answer null rather than guessing", () => {
   assert.equal(compareVersions("0.16.1", undefined), null);
 });
 
-test("a leading v and build metadata are tolerated", () => {
+test("a leading v is tolerated", () => {
   assert.equal(compareVersions("v0.13.2", "0.16.1"), -1);
+});
+
+test("build metadata does not affect precedence", () => {
+  // True of the comparison, and deliberately not asserted of the endpoint.
+  // The client builds its query unencoded (`version={version}` in
+  // update_check.py), and URLSearchParams decodes `+` as a space -- so
+  // `?version=0.16.1+abc` arrives as "0.16.1 abc" and does not parse at all.
+  // No shipped version has ever contained `+`; this documents the layer the
+  // tolerance lives at rather than claiming the endpoint handles it.
   assert.equal(compareVersions("0.16.1+abc123", "0.16.1"), 0);
 });
 
@@ -137,4 +152,90 @@ test("a beta client is told about a newer beta", () => {
     }),
     true,
   );
+});
+
+// --- the endpoint itself ----------------------------------------------------
+//
+// The tests above cover the comparison; these cover the wiring around it.
+// Without them the handler could be hardcoded to "no update", or could pass the
+// client and latest versions the wrong way round, and every test still passed.
+
+import { handleCheckUpdate } from "./worker.js";
+
+const STABLE_HEAD = "3b60d252578722eb74b19ffcd33b0ef8a35a3259";
+const UNTAGGED_HEAD = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+/** A ref advertisement shaped like the one fetchRefs returns. */
+function refsWith({ stableHead = STABLE_HEAD, betaHead = STABLE_HEAD } = {}) {
+  return new Map([
+    ["refs/heads/main", UNTAGGED_HEAD],
+    ["refs/heads/release/stable", stableHead],
+    ["refs/heads/release/beta", betaHead],
+    ["refs/tags/v0.16.1^{}", STABLE_HEAD],
+    ["refs/tags/v0.15.0^{}", "1111111111111111111111111111111111111111"],
+    ["refs/tags/v0.16.2-beta.1^{}", "2222222222222222222222222222222222222222"],
+  ]);
+}
+
+async function ask(query, refs = refsWith()) {
+  const res = await handleCheckUpdate(
+    new Request(`https://quern.dev/api/check-update?${query}`),
+    refs,
+  );
+  return res.json();
+}
+
+test("endpoint: a tarball install behind the release is told to update", async () => {
+  const body = await ask("version=0.13.2&channel=stable");
+  assert.equal(body.update_available, true);
+  assert.equal(body.latest_version, "0.16.1");
+});
+
+test("endpoint: a tarball install on the release is told nothing", async () => {
+  assert.equal((await ask("version=0.16.1&channel=stable")).update_available, false);
+});
+
+test("endpoint: the client and latest versions are not transposed", async () => {
+  // Swapping them inverts every answer, and the comparison tests cannot see it.
+  assert.equal((await ask("version=0.1.0&channel=stable")).update_available, true);
+  assert.equal((await ask("version=9.9.9&channel=stable")).update_available, false);
+});
+
+test("endpoint: a sha still decides when the client sends one", async () => {
+  assert.equal((await ask(`sha=${STABLE_HEAD}&version=0.1.0`)).update_available, false,
+    "the sha matches the head, so no update regardless of the version");
+  assert.equal((await ask("sha=deadbeef&version=0.16.1")).update_available, true);
+});
+
+test("endpoint: the channel is still inferred from the version", async () => {
+  // The fix hoisted this call site. Nothing else would catch breaking it, and
+  // breaking it reinstates the beta downgrade prompt channelFromVersion exists
+  // to prevent.
+  assert.equal((await ask("version=0.14.1-beta.2")).channel, "beta");
+  assert.equal((await ask("version=0.14.1")).channel, "stable");
+  assert.equal((await ask("version=0.14.1-beta.2&channel=stable")).channel, "stable",
+    "an explicit channel still wins");
+});
+
+test("endpoint: an untagged channel head still names an installable release", async () => {
+  // `git push origin main:refs/heads/release/beta` is a documented operation,
+  // and it leaves the head with no tag on it. A tarball client has no sha, so
+  // without a fallback it would be told "no update" however far behind it is.
+  const refs = refsWith({ betaHead: UNTAGGED_HEAD });
+  const body = await ask("version=0.15.0&channel=beta", refs);
+  assert.equal(body.latest_version, "0.16.2-beta.1", "the newest beta tag");
+  assert.equal(body.update_available, true);
+});
+
+test("endpoint: stable is never offered a prerelease", async () => {
+  const refs = refsWith({ stableHead: UNTAGGED_HEAD });
+  const body = await ask("version=0.15.0&channel=stable", refs);
+  assert.equal(body.latest_version, "0.16.1", "not the newer 0.16.2-beta.1");
+  assert.equal(body.update_available, true);
+});
+
+test("endpoint: no refs at all answers no rather than guessing", async () => {
+  const body = await ask("version=0.1.0&channel=stable", new Map());
+  assert.equal(body.latest_sha, null);
+  assert.equal(body.update_available, false);
 });
