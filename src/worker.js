@@ -57,6 +57,92 @@ function parseRefs(body) {
 }
 
 /** Tag name whose commit is `sha`, or null. Prefers the peeled form. */
+/**
+ * Parse a semver string into comparable parts, or null if it isn't one.
+ *
+ * Build metadata (`+sha`) is dropped: semver says it carries no precedence.
+ */
+export function parseVersion(version) {
+  const m = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/
+    .exec(String(version || "").trim());
+  if (!m) return null;
+  return {
+    major: Number(m[1]),
+    minor: Number(m[2]),
+    patch: Number(m[3]),
+    pre: m[4] ? m[4].split(".") : [],
+  };
+}
+
+/**
+ * Semver precedence. Returns -1, 0, 1, or null if either side won't parse.
+ *
+ * The prerelease rules matter here rather than being pedantry: this project
+ * ships `-beta.N` versions, so "0.14.1-beta.2 is older than 0.14.1" and
+ * "beta.2 is newer than beta.1" both have to come out right, and neither
+ * falls out of a string comparison.
+ */
+export function compareVersions(a, b) {
+  const pa = parseVersion(a);
+  const pb = parseVersion(b);
+  if (!pa || !pb) return null;
+
+  for (const part of ["major", "minor", "patch"]) {
+    if (pa[part] !== pb[part]) return pa[part] < pb[part] ? -1 : 1;
+  }
+  // A version with a prerelease suffix precedes the same version without one.
+  if (pa.pre.length === 0 && pb.pre.length > 0) return 1;
+  if (pa.pre.length > 0 && pb.pre.length === 0) return -1;
+
+  const len = Math.max(pa.pre.length, pb.pre.length);
+  for (let i = 0; i < len; i++) {
+    const x = pa.pre[i];
+    const y = pb.pre[i];
+    if (x === undefined) return -1;  // fewer fields precede more
+    if (y === undefined) return 1;
+    const xNum = /^\d+$/.test(x);
+    const yNum = /^\d+$/.test(y);
+    if (xNum && yNum) {
+      if (Number(x) !== Number(y)) return Number(x) < Number(y) ? -1 : 1;
+    } else if (xNum !== yNum) {
+      return xNum ? -1 : 1;         // numeric identifiers precede alphanumeric
+    } else if (x !== y) {
+      return x < y ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
+/**
+ * Whether the client should be told an update exists.
+ *
+ * Two ways to answer, and the SHA is the better one: it is exact, and it is
+ * what a git install can supply. A tarball install has no `.git`, so
+ * `_get_head_sha()` returns null and the client sends only `version=`.
+ *
+ * That case used to answer "no update", always, because the comparison
+ * required a SHA. Tarball installs therefore never learned about any release:
+ * one user sat on 0.13.2 from late May to 11 September, across three minor
+ * versions, with nothing telling them otherwise. They could not be fixed by
+ * shipping a new quern either — the broken check is what would have told them
+ * to upgrade. Same shape as the beta downgrade prompt `channelFromVersion`
+ * was added for, and the same reason it had to be fixed here rather than in
+ * the client.
+ *
+ * Strictly older, not merely different. A client ahead of the channel head --
+ * someone on a dev build, or on beta while asking about stable -- gets `false`
+ * rather than being invited to downgrade.
+ *
+ * A version that does not parse answers `false`. There is no safe guess, and
+ * a wrong "yes" sends someone into an update they did not need.
+ */
+export function isUpdateAvailable({ clientSha, latestSha, clientVersion, latestVersion }) {
+  if (!latestSha) return false;
+  if (clientSha) return clientSha !== latestSha;
+  if (!latestVersion || !clientVersion) return false;
+  return compareVersions(clientVersion, latestVersion) === -1;
+}
+
 function versionForSha(refs, sha) {
   if (!sha) return null;
   for (const [ref, target] of refs) {
@@ -109,10 +195,10 @@ async function fetchRefs() {
 async function handleCheckUpdate(request) {
   const url = new URL(request.url);
   const clientSha = url.searchParams.get("sha") || "";
+  const clientVersion = url.searchParams.get("version") || "";
 
   const requested =
-    url.searchParams.get("channel") ||
-    channelFromVersion(url.searchParams.get("version") || "");
+    url.searchParams.get("channel") || channelFromVersion(clientVersion);
   // Unknown channel falls back to stable rather than erroring: a client from a
   // future version naming a channel this worker doesn't know should still get a
   // conservative, useful answer.
@@ -133,7 +219,12 @@ async function handleCheckUpdate(request) {
     latest_sha: latestSha,
     latest_version: latestVersion,
     channel,
-    update_available: latestSha !== null && clientSha !== "" && clientSha !== latestSha,
+    update_available: isUpdateAvailable({
+      clientSha,
+      latestSha,
+      clientVersion,
+      latestVersion,
+    }),
   };
 
   return new Response(JSON.stringify(body), {
