@@ -6,6 +6,11 @@ set -euo pipefail
 
 INSTALL_DIR="$HOME/.local/share/quern"
 GITHUB_REPO="quern-dev/quern"
+# Where release metadata and assets come from. Overridden only by a release
+# rehearsal, which serves a candidate locally so the first-install path can be
+# tested before the release exists (quern#219). Unset in normal use.
+RELEASES_API="${QUERN_RELEASES_URL:-https://api.github.com/repos/${GITHUB_REPO}}"
+RELEASES_API="${RELEASES_API%/}"
 MIN_PYTHON_VERSION="3.11"
 
 # ---------------------------------------------------------------------------
@@ -82,8 +87,8 @@ fi
 step "Fetching latest release"
 
 # Get latest release tag from GitHub API
-RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest") || \
-    die "Could not fetch release info from GitHub. Check your internet connection."
+RELEASE_JSON=$(curl -fsSL "${RELEASES_API}/releases/latest") || \
+    die "Could not fetch release info from ${RELEASES_API}. Check your internet connection."
 
 LATEST_VERSION=$(printf '%s' "$RELEASE_JSON" | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
 if [ -z "$LATEST_VERSION" ]; then
@@ -151,7 +156,11 @@ if [ -n "$ASSET_URL" ]; then
 else
     # Releases cut before the asset existed, and any release where the upload
     # did not happen. Source-only is a complete, working install.
-    TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+    if [ -n "${QUERN_RELEASES_URL:-}" ]; then
+        TARBALL_URL="${RELEASES_API}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+    else
+        TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+    fi
     BUNDLE_NOTE=""
 fi
 
