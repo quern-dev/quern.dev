@@ -156,7 +156,14 @@ if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
     # not an install without its venv and command. This used to answer
     # "already installed" and exit, so re-running could not repair it and the
     # only way out was deleting the directory by hand (quern.dev#3).
-    if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] && [ -n "$ASSET_URL" ]; then
+    #
+    # The app is looked for where setup leaves it, not only where the asset
+    # delivers it: setup moves it to ~/Applications, so checking the install
+    # directory alone called every same-version re-run "missing the menu-bar
+    # app" and reinstalled -- setup's own check (quern's setup.py) looks in both
+    # for the same reason. Found in a clean-VM test (quern.dev#3).
+    if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] \
+            && [ ! -d "$HOME/Applications/Quern.app" ] && [ -n "$ASSET_URL" ]; then
         REPAIRING="1"
         ok "Quern v${LATEST_VERSION} is installed, but the menu-bar app is missing"
         step "Reinstalling to add it"
