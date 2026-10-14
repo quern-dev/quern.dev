@@ -34,6 +34,24 @@ version_gte() {
     [ "$(printf '%s\n%s' "$2" "$1" | sort -t. -k1,1n -k2,2n -k3,3n | head -1)" = "$2" ]
 }
 
+# How to run quern from here: the bare name once setup has put it on PATH, the
+# install's own wrapper before that. Telling someone to run `quern setup` when
+# setup never got far enough to write the command is "command not found" --
+# which is how a half-finished install presented in the field (quern.dev#3).
+quern_cmd() {
+    if command -v quern &>/dev/null; then
+        printf 'quern'
+    else
+        printf '%s/quern' "$INSTALL_DIR"
+    fi
+}
+
+# Whether setup finished: it builds the venv and writes the quern command, and
+# an install without either is not installed, whatever pyproject.toml says.
+setup_finished() {
+    [ -x "$INSTALL_DIR/.venv/bin/python" ] && [ -e "$HOME/.local/bin/quern" ]
+}
+
 # Read version from pyproject.toml
 read_installed_version() {
     if [ -f "$INSTALL_DIR/pyproject.toml" ]; then
@@ -55,7 +73,7 @@ ok "macOS $(sw_vers -productVersion)"
 
 # Python — probe specific versions, then fall back to python3
 PYTHON_BIN=""
-for candidate in python3.13 python3.12 python3.11 python3; do
+for candidate in python3.14 python3.13 python3.12 python3.11 python3; do
     if command -v "$candidate" &>/dev/null; then
         ver=$("$candidate" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")' 2>/dev/null || true)
         if [ -n "$ver" ] && version_gte "$ver" "$MIN_PYTHON_VERSION"; then
@@ -67,7 +85,7 @@ done
 
 if [ -z "$PYTHON_BIN" ]; then
     die "Python 3.11+ is required. Install via:
-  brew install python@3.12
+  brew install python@3.13
   or download from https://www.python.org/downloads/"
 fi
 ok "$($PYTHON_BIN --version)"
@@ -133,13 +151,29 @@ if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
     #
     # Reinstalling over the top is the repair, and it costs one command rather
     # than waiting for the next release.
-    if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] && [ -n "$ASSET_URL" ]; then
+    #
+    # The other is an install whose setup never finished: a version on disk is
+    # not an install without its venv and command. This used to answer
+    # "already installed" and exit, so re-running could not repair it and the
+    # only way out was deleting the directory by hand (quern.dev#3).
+    #
+    # The app is looked for where setup leaves it, not only where the asset
+    # delivers it: setup moves it to ~/Applications, so checking the install
+    # directory alone called every same-version re-run "missing the menu-bar
+    # app" and reinstalled -- setup's own check (quern's setup.py) looks in both
+    # for the same reason. Found in a clean-VM test (quern.dev#3).
+    if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] \
+            && [ ! -d "$HOME/Applications/Quern.app" ] && [ -n "$ASSET_URL" ]; then
         REPAIRING="1"
         ok "Quern v${LATEST_VERSION} is installed, but the menu-bar app is missing"
         step "Reinstalling to add it"
+    elif ! setup_finished; then
+        REPAIRING="1"
+        warn "Quern v${LATEST_VERSION} is on disk, but its setup did not finish"
+        step "Reinstalling to finish it"
     else
         ok "Quern v${LATEST_VERSION} is already installed"
-        printf "\n  Run ${BOLD}quern setup${RESET} to re-check dependencies.\n\n"
+        printf "\n  Run ${BOLD}%s setup${RESET} to re-check dependencies.\n\n" "$(quern_cmd)"
         exit 0
     fi
 elif [ -n "$CURRENT_VERSION" ]; then
@@ -208,7 +242,38 @@ ok "Installed to $INSTALL_DIR"
 step "Running setup"
 
 cd "$INSTALL_DIR"
-"$PYTHON_BIN" -m server setup
+# Setup's exit code is checked rather than left to `set -e`, which would end the
+# script without a word. And its success is not taken on trust: the venv is
+# checked for before anything runs in it, because a setup that returned 0 with
+# no venv is exactly how a first install failed in the field (quern#455).
+if ! "$PYTHON_BIN" -m server setup; then
+    # A setup that fails late has already built the venv and the command, so a
+    # re-run would call this installed and never register the MCP server --
+    # setup does not do that itself. Register it now, best effort, so the
+    # remaining problem is the one setup reported.
+    # Only from a venv that works: from a broken one it prints an unrelated
+    # npm error right above "its output says why", pointing the reader at the
+    # wrong thing.
+    if "$INSTALL_DIR/.venv/bin/python" -I -c "import fastapi, httpx, uvicorn" 2>/dev/null; then
+        "$INSTALL_DIR/.venv/bin/python" -m server mcp-install || true
+    fi
+    # The installer first: it repairs a half-built environment, which
+    # `quern setup` -- running inside that environment -- cannot.
+    die "Setup did not finish. Its output above says why. Once that is fixed,
+run this installer again, or:
+  $(quern_cmd) setup"
+fi
+# The same test a re-run uses to decide "installed", so this run can't accept a
+# state the next one would call unfinished (CodeRabbit, #4): the venv *and* the
+# command, not the venv alone.
+if ! setup_finished; then
+    missing=""
+    [ -x "$INSTALL_DIR/.venv/bin/python" ] || missing="Quern's Python environment ($INSTALL_DIR/.venv)"
+    [ -e "$HOME/.local/bin/quern" ] || missing="${missing:+$missing and }the quern command ($HOME/.local/bin/quern)"
+    die "Setup exited without creating ${missing}.
+Run this installer again, or:
+  $(quern_cmd) setup"
+fi
 
 step "Registering MCP server"
 
