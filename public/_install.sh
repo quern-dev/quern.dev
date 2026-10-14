@@ -34,6 +34,24 @@ version_gte() {
     [ "$(printf '%s\n%s' "$2" "$1" | sort -t. -k1,1n -k2,2n -k3,3n | head -1)" = "$2" ]
 }
 
+# How to run quern from here: the bare name once setup has put it on PATH, the
+# install's own wrapper before that. Telling someone to run `quern setup` when
+# setup never got far enough to write the command is "command not found" --
+# which is how a half-finished install presented in the field (quern.dev#3).
+quern_cmd() {
+    if command -v quern &>/dev/null; then
+        printf 'quern'
+    else
+        printf '%s/quern' "$INSTALL_DIR"
+    fi
+}
+
+# Whether setup finished: it builds the venv and writes the quern command, and
+# an install without either is not installed, whatever pyproject.toml says.
+setup_finished() {
+    [ -x "$INSTALL_DIR/.venv/bin/python" ] && [ -e "$HOME/.local/bin/quern" ]
+}
+
 # Read version from pyproject.toml
 read_installed_version() {
     if [ -f "$INSTALL_DIR/pyproject.toml" ]; then
@@ -133,13 +151,22 @@ if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
     #
     # Reinstalling over the top is the repair, and it costs one command rather
     # than waiting for the next release.
+    #
+    # The other is an install whose setup never finished: a version on disk is
+    # not an install without its venv and command. This used to answer
+    # "already installed" and exit, so re-running could not repair it and the
+    # only way out was deleting the directory by hand (quern.dev#3).
     if [ "$(uname -s)" = "Darwin" ] && [ ! -d "$INSTALL_DIR/Quern.app" ] && [ -n "$ASSET_URL" ]; then
         REPAIRING="1"
         ok "Quern v${LATEST_VERSION} is installed, but the menu-bar app is missing"
         step "Reinstalling to add it"
+    elif ! setup_finished; then
+        REPAIRING="1"
+        warn "Quern v${LATEST_VERSION} is on disk, but its setup did not finish"
+        step "Reinstalling to finish it"
     else
         ok "Quern v${LATEST_VERSION} is already installed"
-        printf "\n  Run ${BOLD}quern setup${RESET} to re-check dependencies.\n\n"
+        printf "\n  Run ${BOLD}%s setup${RESET} to re-check dependencies.\n\n" "$(quern_cmd)"
         exit 0
     fi
 elif [ -n "$CURRENT_VERSION" ]; then
@@ -208,7 +235,20 @@ ok "Installed to $INSTALL_DIR"
 step "Running setup"
 
 cd "$INSTALL_DIR"
-"$PYTHON_BIN" -m server setup
+# Setup's exit code is checked rather than left to `set -e`, which would end the
+# script without a word. And its success is not taken on trust: the venv is
+# checked for before anything runs in it, because a setup that returned 0 with
+# no venv is exactly how a first install failed in the field (quern#455).
+if ! "$PYTHON_BIN" -m server setup; then
+    die "Setup did not finish. Its output above says why; once that is fixed, run:
+  $(quern_cmd) setup
+or run this installer again."
+fi
+if [ ! -x "$INSTALL_DIR/.venv/bin/python" ]; then
+    die "Setup exited without creating Quern's Python environment ($INSTALL_DIR/.venv).
+Run this installer again, or:
+  $(quern_cmd) setup"
+fi
 
 step "Registering MCP server"
 
