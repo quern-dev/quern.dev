@@ -251,12 +251,17 @@ if ! "$PYTHON_BIN" -m server setup; then
     # re-run would call this installed and never register the MCP server --
     # setup does not do that itself. Register it now, best effort, so the
     # remaining problem is the one setup reported.
-    if [ -x "$INSTALL_DIR/.venv/bin/python" ]; then
+    # Only from a venv that works: from a broken one it prints an unrelated
+    # npm error right above "its output says why", pointing the reader at the
+    # wrong thing.
+    if "$INSTALL_DIR/.venv/bin/python" -I -c "import fastapi, httpx, uvicorn" 2>/dev/null; then
         "$INSTALL_DIR/.venv/bin/python" -m server mcp-install || true
     fi
-    die "Setup did not finish. Its output above says why; once that is fixed, run:
-  $(quern_cmd) setup
-or run this installer again."
+    # The installer first: it repairs a half-built environment, which
+    # `quern setup` -- running inside that environment -- cannot.
+    die "Setup did not finish. Its output above says why. Once that is fixed,
+run this installer again, or:
+  $(quern_cmd) setup"
 fi
 if [ ! -x "$INSTALL_DIR/.venv/bin/python" ]; then
     die "Setup exited without creating Quern's Python environment ($INSTALL_DIR/.venv).
