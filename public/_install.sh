@@ -73,7 +73,7 @@ ok "macOS $(sw_vers -productVersion)"
 
 # Python — probe specific versions, then fall back to python3
 PYTHON_BIN=""
-for candidate in python3.13 python3.12 python3.11 python3; do
+for candidate in python3.14 python3.13 python3.12 python3.11 python3; do
     if command -v "$candidate" &>/dev/null; then
         ver=$("$candidate" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")' 2>/dev/null || true)
         if [ -n "$ver" ] && version_gte "$ver" "$MIN_PYTHON_VERSION"; then
@@ -85,7 +85,7 @@ done
 
 if [ -z "$PYTHON_BIN" ]; then
     die "Python 3.11+ is required. Install via:
-  brew install python@3.12
+  brew install python@3.13
   or download from https://www.python.org/downloads/"
 fi
 ok "$($PYTHON_BIN --version)"
@@ -240,6 +240,13 @@ cd "$INSTALL_DIR"
 # checked for before anything runs in it, because a setup that returned 0 with
 # no venv is exactly how a first install failed in the field (quern#455).
 if ! "$PYTHON_BIN" -m server setup; then
+    # A setup that fails late has already built the venv and the command, so a
+    # re-run would call this installed and never register the MCP server --
+    # setup does not do that itself. Register it now, best effort, so the
+    # remaining problem is the one setup reported.
+    if [ -x "$INSTALL_DIR/.venv/bin/python" ]; then
+        "$INSTALL_DIR/.venv/bin/python" -m server mcp-install || true
+    fi
     die "Setup did not finish. Its output above says why; once that is fixed, run:
   $(quern_cmd) setup
 or run this installer again."
