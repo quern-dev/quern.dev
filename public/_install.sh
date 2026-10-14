@@ -263,8 +263,14 @@ if ! "$PYTHON_BIN" -m server setup; then
 run this installer again, or:
   $(quern_cmd) setup"
 fi
-if [ ! -x "$INSTALL_DIR/.venv/bin/python" ]; then
-    die "Setup exited without creating Quern's Python environment ($INSTALL_DIR/.venv).
+# The same test a re-run uses to decide "installed", so this run can't accept a
+# state the next one would call unfinished (CodeRabbit, #4): the venv *and* the
+# command, not the venv alone.
+if ! setup_finished; then
+    missing=""
+    [ -x "$INSTALL_DIR/.venv/bin/python" ] || missing="Quern's Python environment ($INSTALL_DIR/.venv)"
+    [ -e "$HOME/.local/bin/quern" ] || missing="${missing:+$missing and }the quern command ($HOME/.local/bin/quern)"
+    die "Setup exited without creating ${missing}.
 Run this installer again, or:
   $(quern_cmd) setup"
 fi
