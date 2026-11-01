@@ -9,7 +9,7 @@ WebDriverAgent (WDA) is how Quern controls physical iOS devices — tapping butt
 
 **On simulators**, Quern reads the accessibility tree by default (sim-bridge, or `idb` as a fallback). No setup needed — it works out of the box.
 
-**WDA on a simulator** is the way to see what XCUITest sees. The accessibility tree and XCUITest classify some elements differently — tab-bar items are `RadioButton` in one and `XCUIElementTypeButton` in the other — so if you are writing or debugging an XCUITest, run `start_driver` on the simulator. While WDA runs there, every read and action on that simulator goes through it, elements read from it carry `xcui_type`, and `backend` says `wda`; `stop_driver` switches it back. A simulator needs no signing team, no provisioning and no install: the first `start_driver` builds an unsigned simulator copy of WDA (about a minute), and later starts take a few seconds. Each simulator gets its own port from 8200–8299. Switching back costs about two seconds on the first read while the accessibility bridge recovers from WDA.
+**WDA on a simulator** is the way to see what XCUITest sees. The accessibility tree and XCUITest classify some elements differently — tab-bar items are `RadioButton` in one and `XCUIElementTypeButton` in the other — so if you are writing or debugging an XCUITest, run `start_driver` on the simulator. While WDA runs there, every read and action on that simulator goes through it, elements read from it carry `xcui_type`, and `backend` says `wda`; `stop_driver` switches it back. A simulator needs no signing team, no provisioning and no install: the first `start_driver` builds an unsigned simulator copy of WDA (about a minute), and later starts take a few seconds. Each simulator gets its own port from 8200–8299, and its own port for WDA's MJPEG video from 8300–8399, so no simulator's WDA takes 9100 (#445). Switching back costs about two seconds on the first read while the accessibility bridge recovers from WDA.
 
 **On physical devices**, Quern needs WDA. Your agent will set it up the first time you interact with a physical device. Here's what happens and what might require your input.
 
@@ -19,11 +19,11 @@ WebDriverAgent (WDA) is how Quern controls physical iOS devices — tapping butt
 
 Tell your agent you want to work with a physical device, and it will call `setup_wda`. This:
 
-1. Discovers your signing identities from Xcode
-2. Clones the WDA repo
+1. Discovers your signing team: from Xcode's account list, or, when that is empty (as on Xcode 27), from your installed iOS development provisioning profiles
+2. Fetches the WebDriverAgent version quern pins (`server/device/ios/wda-pin.json`) from npm's `appium-webdriveragent`, checked against its sha512
 3. Builds and installs it on the device as "QuernDriver"
 
-The build is cached — subsequent sessions skip it unless something changes.
+The build is cached; later sessions skip it unless something changes. When quern moves to a new WebDriverAgent version, the next `setup_wda` rebuilds it, and a simulator rebuilds at its next start. If that build fails, or the download does, the build already there keeps working and the answer says so (`wda_update_failed`). `setup_wda`, `start_driver` and `quern status` report the running version against the pinned one.
 
 ### Signing Identity Selection
 

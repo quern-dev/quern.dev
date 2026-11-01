@@ -29,6 +29,14 @@ export default defineConfig({
                   ],
               },
               {
+                  label: 'Remote Servers',
+                  items: [
+                      { label: 'Setting Up a Remote Server', slug: 'remote/remote-setup' },
+                      { label: 'Using Remote Devices', slug: 'remote/remote-agents' },
+                      { label: 'Sharing a Server', slug: 'remote/remote-sharing' },
+                  ],
+              },
+              {
                   label: 'iOS',
                   items: [
                       {
