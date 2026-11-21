@@ -1,0 +1,52 @@
+---
+// Layout for the standalone pages (home, compare); the docs use Starlight.
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '../styles/tokens.css';
+import '../styles/site.css';
+import AccentSwitch from '../components/AccentSwitch.astro';
+import QMark from '../components/QMark.astro';
+
+interface Props { title: string; description: string; page?: 'home' | 'compare' }
+const { title, description, page } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{title}</title>
+    <meta name="description" content={description}>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <AccentSwitch />
+</head>
+<body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="site-header-logo"><QMark size="1.75rem" /><span>Quern</span></a>
+        <nav class="site-header-nav" aria-label="Site">
+            <a href="/getting-started/installation-and-setup/">Docs</a>
+            <a href="/compare/" aria-current={page === 'compare' ? 'page' : undefined}>Compare</a>
+            <a href="https://github.com/quern-dev/quern">GitHub</a>
+        </nav>
+    </div>
+</header>
+<main>
+    <slot />
+</main>
+<footer class="site-footer">
+    <div class="container">
+        <div class="links">
+            <a href="https://github.com/quern-dev/quern">GitHub</a>
+            <a href="/getting-started/installation-and-setup/">Docs</a>
+            <a href="/compare/">Compare</a>
+            <a href="https://github.com/quern-dev/quern/blob/main/LICENSE">Apache 2.0</a>
+            <a href="https://github.com/quern-dev/quern/discussions/1">Contact</a>
+        </div>
+        <p>Built for iOS and Android developers, QA teams, and AI agents.</p>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,167 @@
+---
+import Site from '../layouts/Site.astro';
+import data from '../data/compare.json';
+import '../styles/compare.css';
+---
+<Site title="Quern vs. other AI mobile automation tools"
+      description="Every Quern capability next to Mobile Next, Device MCP, AXe, agent-device, argent, Revyl and others, including where they lead."
+      page="compare">
+<div class="compare container">
+  <header class="compare-head">
+    <div class="kicker">AI agents × mobile devices</div>
+    <h1>Quern <span class="vs">vs.</span> <span id="title-name">{data.products[0].name}</span></h1>
+    <p class="lede">Pick a tool to see every Quern capability next to it, including the ones where it leads, and switch off iOS or Android if you only work on one. Quern is free and open source: one local server that drives iOS and Android devices and debugs them, with network, logs and crashes in the same place.</p>
+  </header>
+
+  <nav class="picker" id="picker" aria-label="Choose a product to compare"></nav>
+
+  <div class="filters" role="group" aria-label="Platforms to show">
+    <span class="lbl">Show platforms:</span>
+    <button type="button" class="toggle" data-plat="ios" aria-pressed="true"><span class="box"></span>iOS</button>
+    <button type="button" class="toggle" data-plat="android" aria-pressed="true"><span class="box"></span>Android</button>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <section class="summary">
+    <div class="ccard prod-head">
+      <h2 class="prod-name" id="p-name"></h2>
+      <div class="prod-meta" id="p-meta"></div>
+      <div class="strong-label">Platforms</div>
+      <div class="platforms" id="p-plat" role="table" aria-label="Platform coverage"></div>
+      <div class="strong-label">Where they're strong</div>
+      <div class="chips" id="p-strong"></div>
+    </div>
+    <div class="ccard scores">
+      <div class="score-row"><div class="who">Quern</div><div class="bar"><span class="y" id="q-bar-y"></span><span class="p" id="q-bar-p"></span></div><div class="num" id="q-num"></div></div>
+      <div class="score-row"><div class="who" id="o-who"></div><div class="bar"><span class="y" id="o-bar-y"></span><span class="p" id="o-bar-p"></span></div><div class="num" id="o-num"></div></div>
+      <div class="only">
+        <div><b id="only-q"></b> only Quern has</div>
+        <div><b id="only-o" class="them"></b> only <span id="only-o-name"></span> has</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="legend">
+    <span><i class="ico y" aria-hidden="true"></i>Included</span>
+    <span><i class="ico p" aria-hidden="true"></i>Partial or limited</span>
+    <span><i class="ico n" aria-hidden="true"></i>Not offered or not documented</span>
+  </div>
+
+  <div class="tablewrap">
+    <table class="ctable">
+      <thead><tr><th scope="col">Capability</th><th scope="col" class="q">Quern</th><th scope="col" id="th-other"></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <p class="fine">Scores count a partial as half. Based on each product's public docs, source repositories and release notes, checked {data.checked}. Details change quickly: if something here is wrong or out of date, <a href="https://github.com/quern-dev/quern.dev/issues/new?title=Comparison%20correction">tell us</a> and we'll fix it.</p>
+</div>
+</Site>
+
+<script>
+import data from '../data/compare.json';
+type S = 'y' | 'p' | 'n';
+type Cell = [S, string?];
+const Y: S = 'y', N: S = 'n';
+const GROUPS = data.groups;
+const FEATURES = GROUPS.flatMap(g => g.features);
+const PRODUCTS = data.products as { id: string; name: string; maker: string; meta: string; strong: string[]; v: Record<string, Cell> }[];
+const PLAT_KEYS: Record<string, string[]> = { ios: ['sim', 'iphone'], android: ['aemu', 'aphys'] };
+const quern = (f: any): Cell => (f.quern ?? [Y]) as Cell;
+let show: Record<string, boolean> = { ios: true, android: true };
+try { const saved = JSON.parse(localStorage.getItem('quern-compare-plat') || 'null'); if (saved && (saved.ios || saved.android)) show = saved; } catch {}
+const featVisible = (f: any) => ((f.platforms as string[] | undefined) ?? ['ios', 'android']).some(pl => show[pl]);
+const supports = (p: typeof PRODUCTS[0], pl: string) => PLAT_KEYS[pl].some(k => (p.v[k] || [N])[0] !== N);
+
+const ICONS: Record<S, string> = {
+  y: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  n: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
+  p: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h8"/></svg>',
+};
+const LABEL: Record<S, string> = { y: 'Included', n: 'Not offered', p: 'Partial' };
+const esc = (s: string) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const mark = (s: S, note?: string) => `<div class="mark"><span class="ico ${s}" role="img" aria-label="${LABEL[s]}">${ICONS[s]}</span>${note ? `<span class="note">${esc(note)}</span>` : ''}</div>`;
+const $ = (id: string) => document.getElementById(id)!;
+let current = '';
+
+document.querySelectorAll<HTMLElement>('.legend .ico').forEach(el => { el.innerHTML = ICONS[[...el.classList].find(c => c.length === 1) as S]; });
+document.querySelectorAll<HTMLElement>('.toggle .box').forEach(b => { b.innerHTML = ICONS.y; });
+document.querySelectorAll<HTMLElement>('.toggle').forEach(t => t.addEventListener('click', () => {
+  const pl = t.dataset.plat!, other = pl === 'ios' ? 'android' : 'ios';
+  show[pl] = !show[pl];
+  if (!show[pl] && !show[other]) show[other] = true;
+  try { localStorage.setItem('quern-compare-plat', JSON.stringify(show)); } catch {}
+  render(current);
+}));
+const picker = $('picker');
+PRODUCTS.forEach(p => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = p.name; b.dataset.id = p.id;
+  b.addEventListener('click', () => { location.hash = p.id; });
+  picker.appendChild(b);
+});
+
+function tally(cells: Cell[]) {
+  let y = 0, p = 0; cells.forEach(([s]) => { if (s === 'y') y++; else if (s === 'p') p++; });
+  return { y, p, score: y + p / 2 };
+}
+const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(1);
+
+function render(id: string) {
+  const p = PRODUCTS.find(x => x.id === id) || PRODUCTS[0];
+  current = p.id;
+  document.querySelectorAll<HTMLElement>('.toggle').forEach(t => t.setAttribute('aria-pressed', String(show[t.dataset.plat!])));
+  picker.querySelectorAll<HTMLButtonElement>('button').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.id === p.id));
+    const prod = PRODUCTS.find(x => x.id === b.dataset.id)!;
+    const out = !['ios', 'android'].some(pl => show[pl] && supports(prod, pl));
+    b.classList.toggle('out', out);
+    if (out) b.dataset.out = show.ios ? 'no iOS' : 'no Android'; else delete b.dataset.out;
+  });
+  const outSel = !['ios', 'android'].some(pl => show[pl] && supports(p, pl));
+  $('banner').classList.toggle('show', outSel);
+  $('banner').textContent = outSel ? `${p.name} doesn't support ${show.android ? 'Android' : 'iOS'}. Every capability below is shown as missing.` : '';
+  $('title-name').textContent = p.name;
+  $('p-name').textContent = p.name;
+  $('p-meta').textContent = `by ${p.maker} · ${p.meta}`;
+  $('p-strong').innerHTML = p.strong.map(s => `<span class="chip">${esc(s)}</span>`).join('');
+  $('th-other').textContent = p.name;
+  $('o-who').textContent = p.name;
+  $('only-o-name').textContent = p.name;
+
+  const PLAT = [['sim', 'iOS Simulator'], ['iphone', 'iPhone / iPad'], ['aemu', 'Android emulator'], ['aphys', 'Android phone']]
+    .filter(([k]) => featVisible(FEATURES.find(f => f.id === k)));
+  const pc = (s: S) => `<div class="pc" role="cell"><span class="ico ${s}" role="img" aria-label="${LABEL[s]}">${ICONS[s]}</span></div>`;
+  const plat = $('p-plat');
+  plat.style.gridTemplateColumns = `auto repeat(${PLAT.length}, 1fr)`;
+  plat.innerHTML = '<div role="columnheader"></div>' + PLAT.map(([, l]) => `<div class="ph" role="columnheader">${l}</div>`).join('') +
+    '<div class="rh" role="rowheader">Quern</div>' + PLAT.map(([k]) => pc(quern(FEATURES.find(f => f.id === k))[0])).join('') +
+    `<div class="rh" role="rowheader">${esc(p.name)}</div>` + PLAT.map(([k]) => pc((p.v[k] || [N])[0])).join('');
+
+  const VIS = FEATURES.filter(featVisible);
+  const total = VIS.length;
+  const q = tally(VIS.map(quern)), o = tally(VIS.map(f => p.v[f.id] || [N]));
+  let onlyQ = 0, onlyO = 0;
+  VIS.forEach(f => { const qs = quern(f)[0], os = (p.v[f.id] || [N])[0]; if (os === 'n' && qs !== 'n') onlyQ++; if (qs === 'n' && os !== 'n') onlyO++; });
+  $('q-bar-y').style.width = (q.y / total * 100) + '%'; $('q-bar-p').style.width = (q.p / total * 100) + '%';
+  $('o-bar-y').style.width = (o.y / total * 100) + '%'; $('o-bar-p').style.width = (o.p / total * 100) + '%';
+  $('q-num').textContent = `${fmt(q.score)}/${total}`;
+  $('o-num').textContent = `${fmt(o.score)}/${total}`;
+  $('only-q').textContent = String(onlyQ);
+  $('only-o').textContent = String(onlyO);
+
+  $('rows').innerHTML = GROUPS.map(g => ({ name: g.name, fs: g.features.filter(featVisible) })).filter(g => g.fs.length).map(g =>
+    `<tr class="group"><th colspan="3" scope="colgroup">${esc(g.name)}</th></tr>` +
+    g.fs.map(f => {
+      const [qs, qn] = quern(f); const [s, note] = p.v[f.id] || [N];
+      const cls = s === 'n' && qs !== 'n' ? 'gap' : qs === 'n' && s !== 'n' ? 'lead' : '';
+      return `<tr class="${cls}"><td class="feat"><span class="f">${esc(f.label)}</span></td>` +
+        `<td class="cell q">${mark(qs, qn)}</td><td class="cell other">${mark(s, note)}</td></tr>`;
+    }).join('')
+  ).join('');
+}
+const fromHash = () => render(location.hash.slice(1));
+window.addEventListener('hashchange', fromHash);
+fromHash();
+</script>

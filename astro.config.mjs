@@ -12,7 +12,18 @@ export default defineConfig({
               src: './src/assets/logo.svg',
           },
           social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/quern-dev/quern' }],
-          customCss: ['./src/styles/custom.css'],
+          customCss: [
+              '@fontsource-variable/bricolage-grotesque',
+              '@fontsource/ibm-plex-sans/400.css',
+              '@fontsource/ibm-plex-sans/500.css',
+              '@fontsource/ibm-plex-sans/600.css',
+              './src/styles/tokens.css',
+              './src/styles/custom.css',
+          ],
+          head: [
+              // A/B helper for the accent colour; see src/components/AccentSwitch.astro.
+              { tag: 'script', content: "try{var q=new URLSearchParams(location.search).get('accent');if(q==='purple'||q==='blue')localStorage.setItem('quern-accent',q);if(localStorage.getItem('quern-accent')==='purple')document.documentElement.dataset.accent='purple'}catch(e){}" },
+          ],
           components: {
               ThemeSelect: './src/components/ThemeSelect.astro',
           },

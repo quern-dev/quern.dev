@@ -1,0 +1,11 @@
+---
+// A ✓ / – / ✗ mark for the comparison tables.
+interface Props { state: 'y' | 'p' | 'n'; note?: string }
+const { state, note } = Astro.props;
+const LABEL = { y: 'Included', p: 'Partial', n: 'Not offered' };
+---
+<span class={`ico ${state}`} role="img" aria-label={note ? `${LABEL[state]}: ${note}` : LABEL[state]} title={note}>
+  {state === 'y' && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>}
+  {state === 'p' && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h8"/></svg>}
+  {state === 'n' && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>}
+</span>

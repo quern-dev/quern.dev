@@ -1,0 +1,14 @@
+---
+// A/B helper: ?accent=purple or ?accent=blue picks the accent and remembers it.
+// Runs before paint so there is no flash. Remove once the colour is decided.
+---
+<script is:inline>
+(function () {
+  try {
+    var q = new URLSearchParams(location.search).get('accent');
+    if (q === 'purple' || q === 'blue') localStorage.setItem('quern-accent', q);
+    var a = localStorage.getItem('quern-accent');
+    if (a === 'purple') document.documentElement.dataset.accent = 'purple';
+  } catch (e) {}
+})();
+</script>

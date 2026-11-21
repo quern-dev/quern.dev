@@ -1,35 +1,52 @@
-/* Quern dark theme customizations for Starlight */
+/* Quern theme for Starlight, built on src/styles/tokens.css. Dark only:
+   the same values apply whatever data-theme Starlight sets. */
 
-:root {
-	--sl-color-accent-low: #1a1640;
-	--sl-color-accent: #6C63FF;
-	--sl-color-accent-high: #A78BFA;
-	--sl-color-white: #F1F5F9;
-	--sl-color-gray-1: #CBD5E1;
-	--sl-color-gray-2: #94A3B8;
-	--sl-color-gray-3: #475569;
-	--sl-color-gray-4: #1E293B;
-	--sl-color-gray-5: #334155;
-	--sl-color-gray-6: #0F1117;
-	--sl-color-black: #0F1117;
+:root,
+:root[data-theme='light'] {
+	--sl-color-accent-low: var(--accent-soft);
+	--sl-color-accent: var(--accent-strong);
+	--sl-color-accent-high: var(--accent);
+	--sl-color-white: var(--ink);
+	--sl-color-gray-1: #c9d0de;
+	--sl-color-gray-2: var(--muted);
+	--sl-color-gray-3: #5b6478;
+	--sl-color-gray-4: var(--line);
+	--sl-color-gray-5: #1f2840;
+	--sl-color-gray-6: var(--surface);
+	--sl-color-black: var(--bg);
+	--sl-color-bg-nav: var(--bg);
+	--sl-color-bg-sidebar: var(--bg);
 
-	/* Hairline / separator contrast */
-	--sl-color-hairline-shade: #334155;
-	--sl-color-hairline: #1E293B;
-	--sl-color-hairline-light: #334155;
+	--sl-color-hairline-shade: var(--line);
+	--sl-color-hairline: #1c2438;
+	--sl-color-hairline-light: var(--line);
 
-	/* Expressive Code (code blocks) contrast fixes */
-	--ec-brdCol: #475569;
-	--ec-frm-trmTtbDotsFg: #94A3B8;
+	--sl-font: var(--font-body);
+	--sl-font-system-mono: var(--mono);
+
+	/* Expressive Code (code blocks) */
+	--ec-brdCol: var(--line);
+	--ec-frm-trmTtbDotsFg: var(--muted);
 	--ec-frm-trmTtbDotsOpa: 0.7;
-	--ec-frm-trmTtbBrdBtmCol: #475569;
-	--ec-frm-inlBtnFg: #94A3B8;
+	--ec-frm-trmTtbBrdBtmCol: var(--line);
+	--ec-frm-inlBtnFg: var(--muted);
 	--ec-frm-inlBtnBgIdleOpa: 0.2;
 	--ec-frm-inlBtnBgHoverOrFocusOpa: 0.4;
-	--ec-codeBg: #1E293B;
-	--ec-frm-trmBg: #1E293B;
-	--ec-frm-trmTtbBg: #172033;
+	--ec-codeBg: var(--surface);
+	--ec-frm-trmBg: var(--surface);
+	--ec-frm-trmTtbBg: var(--surface-2);
+	color-scheme: dark;
 }
+
+/* Display face for headings and the site title */
+.sl-markdown-content :is(h1, h2, h3, h4),
+h1#_top,
+.site-title {
+	font-family: var(--font-display);
+	letter-spacing: -0.01em;
+}
+h1#_top { font-weight: 800; }
+.site-title { color: #fff; font-weight: 800; }
 
 /* Social icons: muted color, no divider (theme picker removed) */
 .social-icons a {
@@ -50,37 +67,7 @@
 
 /* Inline code contrast */
 :root .sl-markdown-content code:not(pre code) {
-	background: #1E293B;
-	border-color: #475569;
-	color: #CBD5E1;
-}
-
-/* Force dark mode */
-:root[data-theme='light'] {
-	--sl-color-accent-low: #1a1640;
-	--sl-color-accent: #6C63FF;
-	--sl-color-accent-high: #A78BFA;
-	--sl-color-white: #F1F5F9;
-	--sl-color-gray-1: #CBD5E1;
-	--sl-color-gray-2: #94A3B8;
-	--sl-color-gray-3: #475569;
-	--sl-color-gray-4: #1E293B;
-	--sl-color-gray-5: #334155;
-	--sl-color-gray-6: #0F1117;
-	--sl-color-black: #0F1117;
-
-	--sl-color-hairline-shade: #334155;
-	--sl-color-hairline: #1E293B;
-	--sl-color-hairline-light: #334155;
-
-	--ec-brdCol: #475569;
-	--ec-frm-trmTtbDotsFg: #94A3B8;
-	--ec-frm-trmTtbDotsOpa: 0.7;
-	--ec-frm-trmTtbBrdBtmCol: #475569;
-	--ec-frm-inlBtnFg: #94A3B8;
-	--ec-frm-inlBtnBgIdleOpa: 0.2;
-	--ec-frm-inlBtnBgHoverOrFocusOpa: 0.4;
-	--ec-codeBg: #1E293B;
-	--ec-frm-trmBg: #1E293B;
-	--ec-frm-trmTtbBg: #172033;
+	background: var(--surface-2);
+	border-color: var(--line);
+	color: #c9d0de;
 }

@@ -1,0 +1,1204 @@
+{
+ "checked": "21 November 2026",
+ "teaser": {
+  "features": [
+   "intercept",
+   "mock",
+   "logs",
+   "remotedebug",
+   "checkpoint",
+   "oss"
+  ],
+  "products": [
+   "mobile-next",
+   "device-mcp",
+   "axe",
+   "agent-device",
+   "argent"
+  ]
+ },
+ "groups": [
+  {
+   "name": "Devices",
+   "features": [
+    {
+     "id": "sim",
+     "label": "iOS Simulator",
+     "quern": [
+      "y"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    },
+    {
+     "id": "iphone",
+     "label": "Physical iPhone and iPad",
+     "quern": [
+      "y",
+      "iOS 27+: nothing installed by default (CoreDevice), WebDriverAgent optional; iOS 26 and earlier: WebDriverAgent"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    },
+    {
+     "id": "aemu",
+     "label": "Android emulator",
+     "quern": [
+      "y"
+     ],
+     "platforms": [
+      "android"
+     ]
+    },
+    {
+     "id": "aphys",
+     "label": "Physical Android",
+     "quern": [
+      "y",
+      "adb + scrcpy"
+     ],
+     "platforms": [
+      "android"
+     ]
+    },
+    {
+     "id": "tv",
+     "label": "TV platforms (tvOS, Android TV)",
+     "quern": [
+      "n"
+     ]
+    },
+    {
+     "id": "pool",
+     "label": "Shared device pool with reservations",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "cloud",
+     "label": "Hosted cloud devices",
+     "quern": [
+      "n",
+      "Your own devices and Macs only"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "UI automation",
+   "features": [
+    {
+     "id": "axtree",
+     "label": "Accessibility tree with element frames",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "gestures",
+     "label": "Tap, swipe, type, multi-touch",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "wait",
+     "label": "Server-side wait for element",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "landmarks",
+     "label": "Screen identification from an app knowledge base",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "shots",
+     "label": "Screenshots with accessibility overlay",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "timeline",
+     "label": "Screenshot timeline of a whole run",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "preview",
+     "label": "Live device preview",
+     "quern": [
+      "y",
+      "Simulators and USB devices, up to 60 fps"
+     ]
+    },
+    {
+     "id": "interactive",
+     "label": "Use the device yourself in the preview window",
+     "quern": [
+      "n",
+      "View-only: Quern is agent-first"
+     ]
+    },
+    {
+     "id": "tests",
+     "label": "Saved tests you can rerun in CI",
+     "quern": [
+      "p",
+      "The agent writes pytest scripts against Quern’s HTTP API; no test framework of its own"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Network",
+   "features": [
+    {
+     "id": "capture",
+     "label": "HTTP(S) traffic capture",
+     "quern": [
+      "y",
+      "mitmproxy"
+     ]
+    },
+    {
+     "id": "intercept",
+     "label": "Pause, edit and release live requests",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "mock",
+     "label": "Mock responses",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "replay",
+     "label": "Replay captured requests",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "session",
+     "label": "Capture scoped to one simulator or one UI action",
+     "quern": [
+      "y",
+      "Per-simulator tagging; per-action on any device"
+     ]
+    },
+    {
+     "id": "tls",
+     "label": "TLS failure diagnosis: untrusted CA vs. pinning",
+     "quern": [
+      "y"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Logs and diagnostics",
+   "features": [
+    {
+     "id": "logs",
+     "label": "One queryable log buffer: device, simulator, logcat",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "crash",
+     "label": "Crash reports",
+     "quern": [
+      "y",
+      "Physical iPhone and Android"
+     ]
+    },
+    {
+     "id": "build",
+     "label": "Build output parsed into errors and warnings",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "oslog",
+     "label": "macOS unified log",
+     "quern": [
+      "y"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Performance",
+   "features": [
+    {
+     "id": "perfnow",
+     "label": "Live CPU, memory, threads and frames",
+     "quern": [
+      "y",
+      "Frames on Android"
+     ]
+    },
+    {
+     "id": "stacks",
+     "label": "Symbolicated main-thread stacks",
+     "quern": [
+      "y",
+      "iOS simulators and iPhones"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    },
+    {
+     "id": "profile",
+     "label": "Profiles summarised as hangs, janky frames, hot functions",
+     "quern": [
+      "y",
+      "Instruments on iOS, perfetto on Android"
+     ]
+    },
+    {
+     "id": "pertrace",
+     "label": "Per-action CPU, memory and frame peaks",
+     "quern": [
+      "y",
+      "Gauges on a recorded run"
+     ]
+    },
+    {
+     "id": "conditions",
+     "label": "Slow or lossy network, thermal and GPU states",
+     "quern": [
+      "y",
+      "Physical iPhone"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "App state",
+   "features": [
+    {
+     "id": "apps",
+     "label": "Build, install and launch apps",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "checkpoint",
+     "label": "Save and restore app state, keychain included",
+     "quern": [
+      "y",
+      "iOS Simulator"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    },
+    {
+     "id": "plist",
+     "label": "Read, diff and watch plists",
+     "quern": [
+      "y",
+      "iOS Simulator"
+     ],
+     "platforms": [
+      "ios"
+     ]
+    },
+    {
+     "id": "settings",
+     "label": "Location, permissions, locale, font scale",
+     "quern": [
+      "y",
+      "Keyboard on iOS; locale and font scale on Android"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Platform",
+   "features": [
+    {
+     "id": "mcp",
+     "label": "MCP server",
+     "quern": [
+      "y",
+      "142 tools, lazy-loaded"
+     ]
+    },
+    {
+     "id": "cli",
+     "label": "Command-line interface",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "remote",
+     "label": "Use devices on another Mac",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "remotedebug",
+     "label": "Network and log debugging from another Mac",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "oss",
+     "label": "Fully open source",
+     "quern": [
+      "y",
+      "Apache-2.0"
+     ]
+    },
+    {
+     "id": "free",
+     "label": "Free",
+     "quern": [
+      "y"
+     ]
+    },
+    {
+     "id": "local",
+     "label": "Runs on your machine; data stays home",
+     "quern": [
+      "y",
+      "No telemetry"
+     ]
+    }
+   ]
+  }
+ ],
+ "products": [
+  {
+   "id": "mobile-next",
+   "name": "Mobile Next",
+   "maker": "Mobile Next HQ",
+   "meta": "mobile-mcp (Apache-2.0) on mobilecli (FSL) · free locally, paid cloud devices from $29/month",
+   "strong": [
+    "Biggest MCP in the category, one-command install into every agent",
+    "Mobilewright: Playwright-style tests from what the agent found",
+    "Real cloud iPhones and Android phones by the minute",
+    "WebView DOM inspection and Flutter widget trees"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "iphone": [
+     "y",
+     "Signed on-device agent (DeviceKit, from Maestro/WDA)"
+    ],
+    "aemu": [
+     "y"
+    ],
+    "aphys": [
+     "y",
+     "adb + devicekit-android"
+    ],
+    "pool": [
+     "p",
+     "Exclusive cloud allocation, paid; not your own devices"
+    ],
+    "cloud": [
+     "y",
+     "Real devices by the minute"
+    ],
+    "axtree": [
+     "y",
+     "Elements with refs"
+    ],
+    "gestures": [
+     "y",
+     "Pinch, drag, long press, batches"
+    ],
+    "wait": [
+     "p",
+     "Mobilewright auto-waits; no MCP wait tool"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots, clip and scale"
+    ],
+    "preview": [
+     "y",
+     "MJPEG/H.264 streams, /mobile-mirror pane"
+    ],
+    "interactive": [
+     "y",
+     "/mobile-mirror: tap, type, Home and Back"
+    ],
+    "tests": [
+     "y",
+     "Mobilewright"
+    ],
+    "capture": [
+     "n",
+     "On their roadmap as planned"
+    ],
+    "intercept": [
+     "n",
+     "On their roadmap as planned"
+    ],
+    "logs": [
+     "p",
+     "Live device logs, no queryable store"
+    ],
+    "crash": [
+     "y"
+    ],
+    "apps": [
+     "y",
+     "Install, launch, clear data; no build"
+    ],
+    "settings": [
+     "p",
+     "GPS, orientation, clipboard, VoiceOver; no permissions or locale"
+    ],
+    "mcp": [
+     "y",
+     "About 35 tools"
+    ],
+    "cli": [
+     "y",
+     "mobilecli"
+    ],
+    "remote": [
+     "y",
+     "Cloud devices; mobilecli server for Mobilewright"
+    ],
+    "oss": [
+     "p",
+     "MCP Apache-2.0; mobilecli and device agents FSL"
+    ],
+    "free": [
+     "y",
+     "Cloud is paid"
+    ],
+    "local": [
+     "y",
+     "Telemetry on by default, opt-out"
+    ]
+   }
+  },
+  {
+   "id": "device-mcp",
+   "name": "Device MCP",
+   "maker": "Proxyman",
+   "meta": "Closed-source Mac app · $69–$138 one-time · built on the MIT idevice crate",
+   "strong": [
+    "No helper app on the iPhone (iOS 27+)",
+    "60 fps native mirror window you can use directly",
+    "Approval prompts and Face ID handoff"
+   ],
+   "v": {
+    "sim": [
+     "y",
+     "iOS 27+"
+    ],
+    "iphone": [
+     "y",
+     "iOS 27+, nothing installed"
+    ],
+    "aemu": [
+     "y"
+    ],
+    "aphys": [
+     "n",
+     "Coming soon"
+    ],
+    "pool": [
+     "p",
+     "Several devices, no reservations"
+    ],
+    "axtree": [
+     "p",
+     "Text and buttons via AX audit + OCR"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "Their headline feature"
+    ],
+    "interactive": [
+     "y",
+     "Mirror window, plus handoff for Face ID and passcodes"
+    ],
+    "capture": [
+     "n",
+     "Needs Proxyman, sold separately"
+    ],
+    "intercept": [
+     "n",
+     "Proxyman, sold separately"
+    ],
+    "mock": [
+     "n",
+     "Proxyman, sold separately"
+    ],
+    "crash": [
+     "y"
+    ],
+    "build": [
+     "p",
+     "build_and_run, Pro only"
+    ],
+    "apps": [
+     "y"
+    ],
+    "checkpoint": [
+     "p",
+     "Download app data only"
+    ],
+    "settings": [
+     "y",
+     "Appearance, VoiceOver, location, GPX"
+    ],
+    "mcp": [
+     "y",
+     "28 tools, Pro only"
+    ],
+    "remote": [
+     "n",
+     "Localhost only"
+    ],
+    "oss": [
+     "n"
+    ],
+    "free": [
+     "p",
+     "Free tier mirrors only"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "axe",
+   "name": "AXe",
+   "maker": "Cameron Cooke",
+   "meta": "GPL-3.0 since v2.1 (MIT up to v2.0.4), free · single-binary Swift CLI + agent skill · UI engine behind XcodeBuildMCP",
+   "strong": [
+    "Physical iPhones with nothing installed, AX tree included",
+    "Agent mode: input checked against the screen the agent saw",
+    "AXe Mirror: use a simulator from your iPhone or iPad",
+    "iPhone Duo simulator and hinge control"
+   ],
+   "v": {
+    "sim": [
+     "y",
+     "Xcode 26 and 27, iPhone Duo included"
+    ],
+    "iphone": [
+     "y",
+     "Nothing installed; tested on iOS 27.2"
+    ],
+    "axtree": [
+     "y",
+     "Simulators and devices, web pages too"
+    ],
+    "gestures": [
+     "y",
+     "Pinch, rotate, draw, batches"
+    ],
+    "wait": [
+     "y",
+     "--wait-timeout polling"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "AXe Mirror app, 60 fps HEVC; simulators"
+    ],
+    "interactive": [
+     "y",
+     "AXe Mirror sends touches back; simulators"
+    ],
+    "apps": [
+     "n",
+     "Use simctl or devicectl"
+    ],
+    "settings": [
+     "p",
+     "Appearance, text size, VoiceOver, location; no permissions or locale"
+    ],
+    "mcp": [
+     "p",
+     "No server of its own; XcodeBuildMCP wraps it"
+    ],
+    "cli": [
+     "y",
+     "Typed JSON output, serve mode"
+    ],
+    "remote": [
+     "p",
+     "Mirror only, to a paired iPhone or iPad"
+    ],
+    "oss": [
+     "y",
+     "GPL-3.0"
+    ],
+    "free": [
+     "y",
+     "Commercial licence for closed-source use"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "agent-device",
+   "name": "agent-device",
+   "maker": "Callstack",
+   "meta": "MIT, free · TypeScript CLI + MCP · own XCTest and Android runners",
+   "strong": [
+    "Most mature remote mode: leases, many agents per host",
+    "Cloud device farms",
+    "TV platforms and Maestro export"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "iphone": [
+     "y",
+     "Own XCTest runner"
+    ],
+    "aemu": [
+     "y"
+    ],
+    "aphys": [
+     "y"
+    ],
+    "tv": [
+     "y",
+     "tvOS, Android TV, HarmonyOS"
+    ],
+    "pool": [
+     "y",
+     "Device leases"
+    ],
+    "cloud": [
+     "y",
+     "BrowserStack, AWS, Limrun"
+    ],
+    "axtree": [
+     "y"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "wait": [
+     "y"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "p",
+     "Recordings, no live view"
+    ],
+    "tests": [
+     "y",
+     ".ad replay scripts, Maestro export"
+    ],
+    "capture": [
+     "p",
+     "Parses app logs, no proxy"
+    ],
+    "replay": [
+     "n",
+     "Replays UI scripts, not traffic"
+    ],
+    "logs": [
+     "p",
+     "Log file grep"
+    ],
+    "perfnow": [
+     "p",
+     "Performance captures"
+    ],
+    "apps": [
+     "y"
+    ],
+    "settings": [
+     "p"
+    ],
+    "mcp": [
+     "y"
+    ],
+    "cli": [
+     "y"
+    ],
+    "remote": [
+     "y",
+     "Token-auth proxy, tunnels, cloud"
+    ],
+    "oss": [
+     "y",
+     "MIT"
+    ],
+    "free": [
+     "y"
+    ],
+    "local": [
+     "y",
+     "Plus optional cloud farms"
+    ]
+   }
+  },
+  {
+   "id": "argent",
+   "name": "argent",
+   "maker": "Software Mansion",
+   "meta": "Apache-2.0 TypeScript around proprietary core binaries · free, paid cloud",
+   "strong": [
+    "Deep profiling: Instruments, Perfetto, Hermes",
+    "Visual regression diffs",
+    "TV platforms and a large React Native audience"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "iphone": [
+     "y",
+     "Own XCUITest runner"
+    ],
+    "aemu": [
+     "y"
+    ],
+    "aphys": [
+     "y"
+    ],
+    "tv": [
+     "y",
+     "tvOS, Android TV"
+    ],
+    "pool": [
+     "p",
+     "Argent Cloud, paid"
+    ],
+    "cloud": [
+     "y",
+     "Argent Cloud, paid"
+    ],
+    "axtree": [
+     "y",
+     "Closed AX service"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "Closed streaming server"
+    ],
+    "tests": [
+     "p",
+     "Flows and replay"
+    ],
+    "capture": [
+     "y",
+     "In-app hooks, not a proxy"
+    ],
+    "logs": [
+     "p"
+    ],
+    "perfnow": [
+     "p"
+    ],
+    "profile": [
+     "y",
+     "Instruments, Perfetto, Hermes: their strongest area"
+    ],
+    "apps": [
+     "y"
+    ],
+    "settings": [
+     "p"
+    ],
+    "mcp": [
+     "y"
+    ],
+    "cli": [
+     "y"
+    ],
+    "remote": [
+     "y",
+     "LAN tools server + argent link"
+    ],
+    "remotedebug": [
+     "p",
+     "In-app capture only"
+    ],
+    "oss": [
+     "p",
+     "Closed core binaries"
+    ],
+    "free": [
+     "y",
+     "Cloud is paid"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "revyl",
+   "name": "Revyl",
+   "maker": "Revyl (funded SaaS)",
+   "meta": "Hosted device cloud · free tier, then $250/month+ · open CLI",
+   "strong": [
+    "Hosted fleet, nothing to set up",
+    "AI test authoring from sessions",
+    "CI-native"
+   ],
+   "v": {
+    "sim": [
+     "y",
+     "In their cloud"
+    ],
+    "iphone": [
+     "p",
+     "Their cloud, not your devices"
+    ],
+    "aemu": [
+     "y",
+     "In their cloud"
+    ],
+    "pool": [
+     "y",
+     "Cloud fleet"
+    ],
+    "cloud": [
+     "y",
+     "Their whole product"
+    ],
+    "axtree": [
+     "p"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "wait": [
+     "p"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "timeline": [
+     "p",
+     "Session recordings"
+    ],
+    "preview": [
+     "y",
+     "Cloud stream"
+    ],
+    "tests": [
+     "y",
+     "YAML tests from sessions"
+    ],
+    "capture": [
+     "p",
+     "Network inspection"
+    ],
+    "logs": [
+     "p"
+    ],
+    "build": [
+     "y",
+     "Cloud Mac runners"
+    ],
+    "apps": [
+     "y"
+    ],
+    "settings": [
+     "p"
+    ],
+    "mcp": [
+     "y"
+    ],
+    "cli": [
+     "y"
+    ],
+    "remote": [
+     "y",
+     "Everything is remote"
+    ],
+    "remotedebug": [
+     "p"
+    ],
+    "oss": [
+     "p",
+     "CLI only"
+    ],
+    "free": [
+     "p",
+     "2 devices free"
+    ],
+    "local": [
+     "n",
+     "Runs in their cloud"
+    ]
+   }
+  },
+  {
+   "id": "ios-simulator-skill",
+   "name": "ios-simulator-skill",
+   "maker": "conorluddy",
+   "meta": "MIT, free · Claude skill of scripts on idb and simctl",
+   "strong": [
+    "Token-efficient xcodebuild output",
+    "Hang detection and WCAG audits",
+    "Claude plugin marketplace listing"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "axtree": [
+     "y",
+     "via idb"
+    ],
+    "gestures": [
+     "y",
+     "via idb"
+    ],
+    "shots": [
+     "p",
+     "Plus visual diff"
+    ],
+    "build": [
+     "y"
+    ],
+    "profile": [
+     "p",
+     "Hang watcher only"
+    ],
+    "apps": [
+     "y"
+    ],
+    "settings": [
+     "p",
+     "simctl"
+    ],
+    "mcp": [
+     "n",
+     "Skill, not a server"
+    ],
+    "cli": [
+     "y",
+     "Scripts"
+    ],
+    "oss": [
+     "y",
+     "MIT"
+    ],
+    "free": [
+     "y"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "serve-sim",
+   "name": "serve-sim",
+   "maker": "Evan Bacon",
+   "meta": "Apache-2.0, free · simulator streaming server",
+   "strong": [
+    "Zero-config npx serve-sim",
+    "Camera feed injection",
+    "Token-protected LAN sharing"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "axtree": [
+     "y",
+     "Ported from idb"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "60 fps stream"
+    ],
+    "apps": [
+     "p",
+     ".ipa drag-to-install"
+    ],
+    "mcp": [
+     "p",
+     "Pairs with agent tools, no tool suite"
+    ],
+    "cli": [
+     "y"
+    ],
+    "remote": [
+     "y",
+     "Simulator only"
+    ],
+    "oss": [
+     "y",
+     "Apache-2.0"
+    ],
+    "free": [
+     "y"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "agent-simulator",
+   "name": "agent-simulator",
+   "maker": "jasonkneen",
+   "meta": "AGPL-3.0, free · browser UI over AXe",
+   "strong": [
+    "React component tree inspection",
+    "Browser-based simulator UI"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "axtree": [
+     "y",
+     "via AXe"
+    ],
+    "gestures": [
+     "y",
+     "via AXe"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "MJPEG"
+    ],
+    "interactive": [
+     "y",
+     "Browser simulator UI"
+    ],
+    "mcp": [
+     "p",
+     "Browser UI first"
+    ],
+    "cli": [
+     "p"
+    ],
+    "oss": [
+     "y",
+     "AGPL-3.0"
+    ],
+    "free": [
+     "y"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "baguette",
+   "name": "baguette",
+   "maker": "tddworks",
+   "meta": "Apache-2.0, free · Swift simulator infrastructure",
+   "strong": [
+    "60 fps simulator streaming",
+    "iOS 26 HID input path",
+    "Device bezels"
+   ],
+   "v": {
+    "sim": [
+     "y"
+    ],
+    "iphone": [
+     "p",
+     "View-only preview via companion app"
+    ],
+    "axtree": [
+     "p",
+     "Code from AXe"
+    ],
+    "gestures": [
+     "y"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots"
+    ],
+    "preview": [
+     "y",
+     "60 fps"
+    ],
+    "cli": [
+     "y"
+    ],
+    "oss": [
+     "y",
+     "Apache-2.0"
+    ],
+    "free": [
+     "y"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  }
+ ]
+}

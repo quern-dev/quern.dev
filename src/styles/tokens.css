@@ -1,0 +1,28 @@
+/* Quern design tokens, shared by the landing pages and the Starlight docs.
+   Dark only. The accent defaults to blue; <html data-accent="purple"> switches
+   it to the previous purple for A/B comparison. */
+:root {
+  color-scheme: dark;
+  --bg: #0c111d;
+  --surface: #141b2b;
+  --surface-2: #1a2336;
+  --ink: #e9edf6;
+  --muted: #98a2b8;
+  --line: #263049;
+  --accent: #7f9cff;        /* text, icons, links */
+  --accent-strong: #5b7cff; /* fills */
+  --accent-soft: #1d2747;   /* tints */
+  --on-accent: #0c111d;
+  --yes: #3ccf8a; --yes-soft: #12301f;
+  --no: #ff6b70;  --no-soft: #3a1619;
+  --part: #f2b63c; --part-soft: #352a0e;
+  --font-display: "Bricolage Grotesque Variable", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 14px;
+}
+:root[data-accent="purple"] {
+  --accent: #a39dff;
+  --accent-strong: #6c63ff;
+  --accent-soft: #211d48;
+}
