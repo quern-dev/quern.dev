@@ -49,7 +49,7 @@ const teaserProducts = data.teaser.products.map(id => data.products.find(p => p.
     <div class="how-it-works-split">
         <div class="how-it-works-text">
             <p>Quern runs as a local server on your Mac. It connects to iOS simulators and Android emulators via their native toolchains, and to physical devices over USB. It captures logs and network traffic through lightweight adapters, and exposes everything as MCP tools that AI coding agents can call directly.</p>
-            <p class="tool-count">107 MCP tools across 17 categories, lazy-loaded so they don't bloat your context window. Works with Claude Code, Cursor, and any MCP-compatible client.</p>
+            <p class="tool-count">147 MCP tools across 18 categories, lazy-loaded so they don't bloat your context window. Works with Claude Code, Cursor, and any MCP-compatible client.</p>
         </div>
         <div class="context-screenshot">
             <img src="images/context_use.png" alt="Context usage after loading 3 Quern MCP tools — only 4% of the context window used">
@@ -103,14 +103,14 @@ const teaserProducts = data.teaser.products.map(id => data.products.find(p => p.
     <ul class="req-list">
         <li class="required">macOS</li>
         <li class="required">Homebrew</li>
-        <li class="required">Python 3.11+</li>
-        <li class="required">Node.js 22+</li>
-        <li class="platform">Xcode &mdash; iOS support enabled when detected</li>
+        <li class="required">Python 3.11+ &mdash; setup offers to install one</li>
+        <li class="required">Node.js 22.19+</li>
+        <li class="platform">Xcode &mdash; for iOS simulators, and for iPhones on iOS 26 and earlier. iPhones on iOS 27 and later need no Xcode</li>
         <li class="platform">Android SDK (adb) &mdash; Android support enabled when detected</li>
-        <li class="auto">idb-companion &mdash; iOS simulator UI automation</li>
         <li class="auto">mitmproxy &mdash; network traffic capture</li>
         <li class="auto">pymobiledevice3 &mdash; iOS physical device support</li>
         <li class="auto">scrcpy &mdash; Android live screen preview</li>
+        <li class="auto">idb-companion &mdash; only on Intel Macs or Xcode before 26; otherwise simulator UI runs natively</li>
     </ul>
     <p class="req-note">The install script detects your platforms and sets up everything automatically.</p>
 </section>
