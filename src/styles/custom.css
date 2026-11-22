@@ -40,13 +40,12 @@
 
 /* Display face for headings and the site title */
 .sl-markdown-content :is(h1, h2, h3, h4),
-h1#_top,
-.site-title {
+h1#_top {
 	font-family: var(--font-display);
 	letter-spacing: -0.01em;
 }
 h1#_top { font-weight: 800; }
-.site-title { color: #fff; font-weight: 800; }
+.site-title { color: #fff; font-family: var(--font-body); font-weight: 600; }
 
 /* Social icons: muted color, no divider (theme picker removed) */
 .social-icons a {
