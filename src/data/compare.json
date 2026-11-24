@@ -1,5 +1,5 @@
 {
- "checked": "21 November 2026",
+ "checked": "23 November 2026",
  "teaser": {
   "features": [
    "intercept",
@@ -674,6 +674,113 @@
     "free": [
      "y",
      "Commercial licence for closed-source use"
+    ],
+    "local": [
+     "y"
+    ]
+   }
+  },
+  {
+   "id": "robomori",
+   "name": "Robomori",
+   "maker": "Alex Styl",
+   "meta": "Closed-source desktop app for Mac, Windows and Linux · Android only · $29–$39 one-time with a year of updates",
+   "strong": [
+    "Android traffic capture with mock and rewrite rules, HAR export",
+    "Edit an app's SQLite, Room and preferences while it runs",
+    "Device presets to reproduce bug reports",
+    "Webcam, microphone and localhost inside the emulator"
+   ],
+   "v": {
+    "aemu": [
+     "y",
+     "Downloads system images and boots them"
+    ],
+    "aphys": [
+     "y",
+     "USB or Wi-Fi"
+    ],
+    "tv": [
+     "y",
+     "Watches and TVs"
+    ],
+    "pool": [
+     "y",
+     "One emulator per agent: device claim and release"
+    ],
+    "axtree": [
+     "p",
+     "Screen as text with refs and positions"
+    ],
+    "gestures": [
+     "y",
+     "Tap, type, swipe, drag, zoom"
+    ],
+    "wait": [
+     "y",
+     "screen wait; each action waits to settle"
+    ],
+    "shots": [
+     "p",
+     "Plain screenshots with a clean status bar"
+    ],
+    "preview": [
+     "y",
+     "Mirror window, USB or Wi-Fi"
+    ],
+    "interactive": [
+     "y",
+     "Use the device in the app window"
+    ],
+    "capture": [
+     "y",
+     "VPN on the device; HTTPS on Play-less emulators, rooted devices, debug builds"
+    ],
+    "intercept": [
+     "p",
+     "Rewrite rules set in advance; no pause and edit"
+    ],
+    "mock": [
+     "y"
+    ],
+    "session": [
+     "p",
+     "Filter by app"
+    ],
+    "logs": [
+     "p",
+     "Logcat viewer with filters, no queryable store"
+    ],
+    "crash": [
+     "y",
+     "Stack traces open in your IDE"
+    ],
+    "apps": [
+     "p",
+     "Install and launch; you build with Gradle"
+    ],
+    "settings": [
+     "y",
+     "Locale, dark mode, font size, TalkBack, location; presets"
+    ],
+    "mcp": [
+     "y",
+     "robomori mcp"
+    ],
+    "cli": [
+     "y",
+     "--json on every command"
+    ],
+    "remote": [
+     "n"
+    ],
+    "oss": [
+     "n",
+     "Closed source"
+    ],
+    "free": [
+     "n",
+     "7-day trial, then $29+ one-time"
     ],
     "local": [
      "y"
